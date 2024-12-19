@@ -1,0 +1,2 @@
+# IoT-Enabled-Real-Time-Asset-Tracking-and-Predictive-Analytics-for-Enhanced-Management
+This project is an IoT-based asset tracking system that uses GPS, GSM, and sensors for real-time monitoring of location and condition, with predictive maintenance powered by machine learning. It includes features like anomaly detection, geo-fencing alerts, and a mobile-friendly interface, piloted in Addis Ababa, Ethiopia.
