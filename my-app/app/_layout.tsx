@@ -4,11 +4,15 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { Stack } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
+
+// Import your global CSS file
+import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -43,8 +47,9 @@ export default function RootLayout() {
         <Stack.Screen name="(properties)" options={{ headerShown: false }} />
         <Stack.Screen name="(users)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+        <StatusBar style="auto" />
+        <Slot />
       </Stack>
-      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }

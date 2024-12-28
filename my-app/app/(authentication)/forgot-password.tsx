@@ -6,7 +6,6 @@ import {
   View,
 } from "react-native";
 import { useFonts, Inter_600SemiBold } from "@expo-google-fonts/inter";
-import { scale, verticalScale } from "react-native-size-matters";
 import AppLoading from "expo-app-loading";
 import { useState } from "react";
 import { Link } from "expo-router";
@@ -22,8 +21,8 @@ export default function ForgotPassword() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.heading}>
+    <View className="flex-1 justify-start pt-32">
+      <View className="justify-center items-center w-[276px] h-[82px] self-center">
         <Text
           style={{
             fontSize: 24,
@@ -32,30 +31,33 @@ export default function ForgotPassword() {
         >
           Forgot Password?
         </Text>
-        <Text style={styles.paragraph}>
-          Enter your email address, and we will{" "}
-          <Text style={styles.otpText}>send an OTP</Text>
+        <Text className="text-base leading-7 text-center mb-5 pt-2 font-thin">
+          Enter your email address, and we will
+          <Text className="text-base leading-6 text-center">
+            {" "}
+            {"\n"}send an OTP
+          </Text>
         </Text>
       </View>
-      <View style={styles.formContainer}>
+      <View className="mx-7 pt-[60px] px-5 text-base font-bold">
         <Text>Email</Text>
         <TextInput
           placeholder="Enter email address"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
-          style={styles.textInput}
+          className="rounded border border-gray-300 border-solid p-3 my-2 min-h-[10px]"
         />
         <Link href="/sign-up" asChild>
-          <TouchableOpacity style={styles.TouchableOpacityContinue}>
-            <Text style={styles.ContinueButton}>Continue</Text>
+          <TouchableOpacity className="bg-[#21252C] mt-8 w-[335px] h-16 justify-center items-center self-center rounded-md">
+            <Text className="self-center text-white text-center">Continue</Text>
           </TouchableOpacity>
         </Link>
-        <View style={styles.rememberedPassword}>
+        <View className="flex-row justify-center items-center mt-7">
           <Text>Remembered password?</Text>
           <Link href="/sign-up" asChild>
             <TouchableOpacity>
-              <Text style={styles.signInButton}> Sign in</Text>
+              <Text className="font-bold"> Sign in</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -63,73 +65,3 @@ export default function ForgotPassword() {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    paddingTop: verticalScale(94),
-  },
-  heading: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 276,
-    height: 82,
-    alignSelf: "center",
-  },
-  paragraph: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: "center",
-    marginBottom: 20,
-    paddingTop: 8,
-    fontWeight: "100",
-  },
-  otpText: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: "center",
-  },
-  formContainer: {
-    marginHorizontal: 20,
-    paddingTop: verticalScale(50),
-    fontFamily: "Inter_700Bold",
-    paddingLeft: scale(20),
-    paddingRight: scale(20),
-    fontSize: 16,
-  },
-  textInput: {
-    borderRadius: 5,
-    borderStyle: "solid",
-    borderColor: "#D3D3D3",
-    borderWidth: 0.5,
-    padding: 10,
-    marginVertical: 10,
-    minHeight: 10,
-  },
-  TouchableOpacityContinue: {
-    backgroundColor: "#21252C",
-    marginTop: 24,
-    width: 335,
-    height: 56,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    borderRadius: 8,
-  },
-  ContinueButton: {
-    alignSelf: "center",
-    color: "white",
-    textAlign: "center",
-  },
-  rememberedPassword: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 24,
-  },
-
-  signInButton: {
-    fontStyle: "normal",
-    fontWeight: "bold",
-  },
-});
