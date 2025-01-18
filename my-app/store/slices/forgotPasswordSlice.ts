@@ -1,4 +1,3 @@
-// redux/slices/forgotPasswordSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type ForgotPasswordState = {

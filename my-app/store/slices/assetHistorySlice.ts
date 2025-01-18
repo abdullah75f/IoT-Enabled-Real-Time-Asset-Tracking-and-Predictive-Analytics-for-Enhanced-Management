@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+type InitialData = {
+  totalValue: number;
+  percentageChange: number;
+  totalAssets: number;
+  industries: number;
+};
+
 type AssetHistoryState = {
-  initialData: {
-    totalValue: number;
-    percentageChange: number;
-    totalAssets: number;
-    industries: number;
-  };
+  initialData: InitialData;
   anomalyData: Record<string, any>;
   carNames: string[];
   loadingInitialData: boolean;
@@ -34,28 +36,25 @@ const assetHistorySlice = createSlice({
   name: "assetHistory",
   initialState,
   reducers: {
-    setInitialData: (
-      state,
-      action: PayloadAction<typeof initialState.initialData>
-    ) => {
+    setInitialData(state, action: PayloadAction<InitialData>) {
       state.initialData = action.payload;
     },
-    setAnomalyData: (state, action: PayloadAction<Record<string, any>>) => {
+    setAnomalyData(state, action: PayloadAction<Record<string, any>>) {
       state.anomalyData = action.payload;
     },
-    setCarNames: (state, action: PayloadAction<string[]>) => {
+    setCarNames(state, action: PayloadAction<string[]>) {
       state.carNames = action.payload;
     },
-    setLoadingInitialData: (state, action: PayloadAction<boolean>) => {
+    setLoadingInitialData(state, action: PayloadAction<boolean>) {
       state.loadingInitialData = action.payload;
     },
-    setLoadingAnomaly: (state, action: PayloadAction<boolean>) => {
+    setLoadingAnomaly(state, action: PayloadAction<boolean>) {
       state.loadingAnomaly = action.payload;
     },
-    setError: (state, action: PayloadAction<string | null>) => {
+    setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    toggleShowAllCars: (state) => {
+    toggleShowAllCars(state) {
       state.showAllCars = !state.showAllCars;
     },
   },
