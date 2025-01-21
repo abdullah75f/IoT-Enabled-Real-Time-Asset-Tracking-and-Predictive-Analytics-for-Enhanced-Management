@@ -1,23 +1,28 @@
 import {
-  StyleSheet,
+  ActivityIndicator,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useFonts, Inter_600SemiBold } from "@expo-google-fonts/inter";
-import AppLoading from "expo-app-loading";
-import { useState } from "react";
 import { Link } from "expo-router";
+import { useDispatch, useSelector } from "react-redux";
+import { setEmail } from "@/store/slices/forgotPasswordSlice";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const dispatch = useDispatch();
+  const forgotPasswordData = useSelector((state: any) => state.forgotPassword);
   const [fontsLoaded] = useFonts({
     Inter_600SemiBold,
   });
 
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="black" />
+      </View>
+    );
   }
 
   return (
@@ -34,7 +39,6 @@ export default function ForgotPassword() {
         <Text className="text-base leading-7 text-center mb-5 pt-2 font-thin">
           Enter your email address, and we will
           <Text className="text-base leading-6 text-center">
-            {" "}
             {"\n"}send an OTP
           </Text>
         </Text>
@@ -43,8 +47,8 @@ export default function ForgotPassword() {
         <Text>Email</Text>
         <TextInput
           placeholder="Enter email address"
-          value={email}
-          onChangeText={setEmail}
+          value={forgotPasswordData.email}
+          onChangeText={(text) => dispatch(setEmail(text))}
           keyboardType="email-address"
           className="rounded border border-gray-300 border-solid p-3 my-2 min-h-[10px]"
         />
@@ -55,7 +59,7 @@ export default function ForgotPassword() {
         </Link>
         <View className="flex-row justify-center items-center mt-7">
           <Text>Remembered password?</Text>
-          <Link href="/sign-up" asChild>
+          <Link href="/" asChild>
             <TouchableOpacity>
               <Text className="font-bold"> Sign in</Text>
             </TouchableOpacity>

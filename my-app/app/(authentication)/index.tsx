@@ -1,18 +1,43 @@
+import { setEmail, setPassword } from "@/store/slices/signInSlices";
 import {
   useFonts,
   Inter_400Regular,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
 import { Link } from "expo-router";
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
-export default function SignUp() {
+import { useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+export default function SignIn() {
+  const dispatch = useDispatch();
+  const signInData = useSelector((state: any) => state.signIn);
+
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
   });
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    return () => {
+      dispatch(setEmail(""));
+      dispatch(setPassword(""));
+    };
+  }, [dispatch]);
+
+  if (!fontsLoaded) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="black" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 justify-start pt-24">
@@ -20,18 +45,18 @@ export default function SignUp() {
         Sign In
       </Text>
       <View className="mx-6 pt-20 px-6 font-bold text-base">
-        <Text>Email</Text>
+        <Text>Email Address</Text>
         <TextInput
-          value={email}
-          onChangeText={setEmail}
+          value={signInData.email}
+          onChangeText={(text) => dispatch(setEmail(text))}
           placeholder="Enter your email"
           keyboardType="email-address"
           className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
         />
         <Text>Password</Text>
         <TextInput
-          value={password}
-          onChangeText={setPassword}
+          value={signInData.password}
+          onChangeText={(text) => dispatch(setPassword(text))}
           placeholder="Enter your password"
           secureTextEntry
           className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
@@ -43,7 +68,7 @@ export default function SignUp() {
         </Link>
       </View>
       <View>
-        <Link href="/sign-up" asChild>
+        <Link href="/notifications" asChild>
           <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
             <Text className="self-center text-white text-center">Sign In</Text>
           </TouchableOpacity>
@@ -64,7 +89,7 @@ export default function SignUp() {
       </View>
       <View className="flex-1">
         <View className="flex-row justify-around">
-          <Link href="/sign-up" asChild>
+          <Link href="/about-us" asChild>
             <TouchableOpacity className="border rounded-[16px] w-[160px] h-16 justify-center items-center">
               <View className="flex-row items-center gap-2">
                 <Image
@@ -75,18 +100,18 @@ export default function SignUp() {
               </View>
             </TouchableOpacity>
           </Link>
-          <Link href="/sign-up" asChild>
+          <Link href="/notifications" asChild>
             <TouchableOpacity className="border rounded-[16px] w-[160px] h-16 justify-center items-center">
               <View className="flex-row items-center gap-2">
                 <Image
-                  source={require("../../assets/images/apple-logo.png")}
+                  source={require("../../assets/images/PhoneIcon.png")}
                   style={{
                     width: 20,
                     height: 20,
                     backgroundColor: "transparent",
                   }}
                 />
-                <Text className="text-lg text-black">Apple</Text>
+                <Text className="text-lg text-black">Phone</Text>
               </View>
             </TouchableOpacity>
           </Link>
