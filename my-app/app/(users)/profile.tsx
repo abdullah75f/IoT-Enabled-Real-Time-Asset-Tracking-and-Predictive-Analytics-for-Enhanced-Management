@@ -7,30 +7,30 @@ import {
   FlatList,
   Image,
   ScrollView,
+  Alert,
 } from "react-native";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import Footer from "@/components/footer";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSignInState } from "@/store/slices/signInSlices";
-import { updateSignUpData } from "@/store/slices/signUpSlice";
-
+import { uploadProfilePicture } from "@/app/apiService/api";
 export default function Profile() {
   const dispatch = useDispatch();
   const signUpData = useSelector((state: any) => state.signUp);
-  const signInData = useSelector((state: any) => state.signIn);
 
-  const [editedSignUpData, setEditedSignUpData] = useState({
-    firstName: signUpData.firstName,
-    lastName: signUpData.lastName,
-    email: signUpData.email,
-    phoneNumber: signUpData.phoneNumber,
-    gender: signUpData.gender,
-    age: signUpData.age,
-    password: signUpData.password,
-    confirmPassword: signUpData.confirmPassword,
-    selectedOption: signUpData.selectedOption,
-  });
+  // const [editedSignUpData, setEditedSignUpData] = useState({
+  //   firstName: signUpData.firstName,
+  //   lastName: signUpData.lastName,
+  //   email: signUpData.email,
+  //   phoneNumber: signUpData.phoneNumber,
+  //   gender: signUpData.gender,
+  //   age: signUpData.age,
+  //   address: signUpData.address,
+  //   password: signUpData.password,
+  //   confirmPassword: signUpData.confirmPassword,
+  //   selectedOption: signUpData.selectedOption,
+  // });
 
   const [currentPosition, setCurrentPosition] = useState(""); // it will be removed
 
@@ -65,13 +65,33 @@ export default function Profile() {
     });
 
     if (!result.canceled) {
-      setProfilePicture(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setProfilePicture(imageUri);
+      uploadPicture(imageUri);
     }
   };
 
-  const handleSave = () => {
-    dispatch(updateSignUpData(editedSignUpData));
-    alert("Changes saved successfully!");
+  const uploadPicture = async (uri: string) => {
+    try {
+      const formData = new FormData();
+      const fileExtension = uri.split(".").pop();
+      const fileName = `profile_picture.${fileExtension}`;
+      formData.append("file", {
+        uri,
+        name: fileName,
+        type: `image/${fileExtension}`,
+      } as any);
+      console.log("signUpData.id:", signUpData.id); // Check the value of userId
+
+      formData.append("userId", signUpData.id);
+      console.log("Form Data:", formData); // Debug form data to check the userId
+
+      const response = await uploadProfilePicture(formData);
+      Alert.alert("Success", "Profile picture uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      Alert.alert("Error", "Failed to upload profile picture.");
+    }
   };
 
   return (
@@ -156,6 +176,16 @@ export default function Profile() {
                 value={signUpData.age}
                 editable={false}
                 placeholder="Enter your Age"
+                className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="font-semibold">Address</Text>
+              <TextInput
+                value={signUpData.address}
+                editable={false}
+                placeholder="Enter your Address"
                 className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
               />
             </View>
