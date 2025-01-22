@@ -8,6 +8,14 @@ export default function AuthenticationLayout() {
         options={{ headerShown: true, title: "Sign Up" }}
       />
       <Stack.Screen
+                    name="landing-Page"
+                    options={{ headerShown: true, title: "Landing Page" }}
+                  />
+       <Stack.Screen
+              name="sign-In"
+              options={{ headerShown: true, title: "Sign In" }}
+            />
+      <Stack.Screen
         name="forgot-password"
         options={{ headerShown: true, title: "Forgot Password" }}
       />
