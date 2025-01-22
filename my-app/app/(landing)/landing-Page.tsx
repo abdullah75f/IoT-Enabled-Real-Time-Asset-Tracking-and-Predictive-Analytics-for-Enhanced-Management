@@ -29,7 +29,7 @@ export default function LandingPage() {
       {/* Get Started Button */}
       <TouchableOpacity
         style={styles.getStartedButton}
-        onPress={() => router.push("/sign-in")} // Navigate to Sign-In Page
+        onPress={() => router.push("/sign-up")} // Navigate to Sign-In Page
       >
         <Text style={styles.getStartedText}>Get Started</Text>
       </TouchableOpacity>
