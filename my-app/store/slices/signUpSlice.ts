@@ -7,9 +7,11 @@ type SignUpState = {
   phoneNumber: string;
   gender: "male" | "female";
   age: string;
+  address: string;
   password: string;
   confirmPassword: string;
   selectedOption: "email" | "phone";
+  passwordMismatchError: boolean;
 };
 
 const initialState: SignUpState = {
@@ -19,9 +21,11 @@ const initialState: SignUpState = {
   phoneNumber: "",
   gender: "male",
   age: "",
+  address: "",
   password: "",
   confirmPassword: "",
   selectedOption: "email",
+  passwordMismatchError: false,
 };
 
 const signUpSlice = createSlice({
@@ -46,37 +50,45 @@ const signUpSlice = createSlice({
     setAge: (state, action: PayloadAction<string>) => {
       state.age = action.payload;
     },
+    setAddress: (state, action: PayloadAction<string>) => {
+      state.address = action.payload;
+    },
     setPassword: (state, action: PayloadAction<string>) => {
       state.password = action.payload;
     },
     setConfirmPassword: (state, action: PayloadAction<string>) => {
       state.confirmPassword = action.payload;
     },
+    setPasswordMismatchError: (state, action) => {
+      state.passwordMismatchError = action.payload;
+    },
     setSelectedOption: (state, action: PayloadAction<"email" | "phone">) => {
       state.selectedOption = action.payload;
     },
-    updateSignUpData: (state, action: PayloadAction<SignUpState>) => {
-      const {
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        gender,
-        age,
-        password,
-        confirmPassword,
-        selectedOption,
-      } = action.payload;
-      state.firstName = firstName;
-      state.lastName = lastName;
-      state.email = email;
-      state.phoneNumber = phoneNumber;
-      state.gender = gender;
-      state.age = age;
-      state.password = password;
-      state.confirmPassword = confirmPassword;
-      state.selectedOption = selectedOption;
-    },
+    // updateSignUpData: (state, action: PayloadAction<SignUpState>) => {
+    //   const {
+    //     firstName,
+    //     lastName,
+    //     email,
+    //     phoneNumber,
+    //     gender,
+    //     age,
+    //     address,
+    //     password,
+    //     confirmPassword,
+    //     selectedOption,
+    //   } = action.payload;
+    //   state.firstName = firstName;
+    //   state.lastName = lastName;
+    //   state.email = email;
+    //   state.phoneNumber = phoneNumber;
+    //   state.gender = gender;
+    //   state.age = age;
+    //   state.address = address;
+    //   state.password = password;
+    //   state.confirmPassword = confirmPassword;
+    //   state.selectedOption = selectedOption;
+    // },
   },
 });
 
@@ -87,11 +99,12 @@ export const {
   setPhoneNumber,
   setGender,
   setAge,
+  setAddress,
   setPassword,
   setSelectedOption,
   setConfirmPassword,
-  updateSignUpData, 
-
+  setPasswordMismatchError,
+  // updateSignUpData,
 } = signUpSlice.actions;
 
 export default signUpSlice.reducer;
