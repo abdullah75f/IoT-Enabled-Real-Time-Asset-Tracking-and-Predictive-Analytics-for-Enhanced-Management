@@ -18,7 +18,7 @@ export default function IntroPage() {
             router.replace("/landing-Page"); // Navigate to Landing Page
           } else {
             // If not the first time, navigate to the Sign-In page
-            router.replace("/sign-in");
+            router.replace("/landing-Page");
           }
         }, 5000); // 5-second delay
       } catch (error) {

@@ -1,4 +1,8 @@
-import { useFonts, Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
 import { Link } from "expo-router";
 import { useState, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
@@ -32,7 +36,9 @@ export default function OTPVerification() {
 
   return (
     <View className="flex-1 justify-start pt-24 px-6 bg-white">
-      <Text className="text-black self-center font-bold text-[24px]">Enter OTP</Text>
+      <Text className="text-black self-center font-bold text-[24px]">
+        Enter OTP
+      </Text>
       <Text className="text-gray-500 text-center mt-2">
         We’ve sent an OTP code to your email,{" "}
         <Text className="font-bold">Random3321@gmail.com</Text>

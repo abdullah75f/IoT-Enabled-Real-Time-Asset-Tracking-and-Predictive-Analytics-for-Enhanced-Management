@@ -167,17 +167,17 @@ export default function SignUp() {
           />
         </View>
         <View>
-          <Link href="/sign-up" asChild>
+          <Link href="/(authentication)/otp-input" asChild>
             <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
               <Text className="self-center text-white text-center">
-                Sign In
+                Sign Up
               </Text>
             </TouchableOpacity>
           </Link>
         </View>
         <View className="flex-row justify-center items-center mt-6">
           <Text>Have an account?</Text>
-          <Link href="/" asChild>
+          <Link href="/(authentication)/sign-in" asChild>
             <TouchableOpacity>
               <Text className="font-bold"> Sign In</Text>
             </TouchableOpacity>
