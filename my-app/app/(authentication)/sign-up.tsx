@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import {
   setFirstName,
@@ -15,16 +16,20 @@ import {
   setPhoneNumber,
   setGender,
   setAge,
+  setAddress,
   setPassword,
   setConfirmPassword,
+  setPasswordMismatchError,
   setSelectedOption,
 } from "@/store/slices/signUpSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import { Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createUser } from "@/app/apiService/api";
 
 export default function SignUp() {
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const signUpData = useSelector((state: any) => state.signUp);
   const [fontsLoaded] = useFonts({
@@ -32,13 +37,77 @@ export default function SignUp() {
     Inter_700Bold,
   });
   useEffect(() => {
+    const initialize = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setLoading(false);
+    };
+
+    initialize();
+
     return () => {
       dispatch(setEmail(""));
       dispatch(setPassword(""));
     };
   }, [dispatch]);
 
-  if (!fontsLoaded) {
+  const handlePasswordChange = (password: string) => {
+    dispatch(setPassword(password));
+    if (password !== signUpData.confirmPassword) {
+      dispatch(setPasswordMismatchError(true));
+    } else {
+      dispatch(setPasswordMismatchError(false));
+    }
+  };
+
+  const handleConfirmPasswordChange = (confirmPassword: string) => {
+    dispatch(setConfirmPassword(confirmPassword));
+    if (signUpData.password !== confirmPassword) {
+      dispatch(setPasswordMismatchError(true));
+    } else {
+      dispatch(setPasswordMismatchError(false));
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (signUpData.password !== signUpData.confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      gender,
+      age,
+      password,
+      confirmPassword,
+      address,
+    } = signUpData;
+
+    try {
+      const userData = {
+        firstName,
+        lastName,
+        email: signUpData.selectedOption === "email" ? email : null,
+        phoneNumber: signUpData.selectedOption === "phone" ? phoneNumber : null,
+        gender,
+        age: parseInt(age),
+        password,
+        address,
+      };
+
+      const response = await createUser(userData);
+      console.log("User created:", response);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to sign up. Please try again."
+      );
+    }
+  };
+
+  if (!fontsLoaded || loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="black" />
@@ -71,23 +140,37 @@ export default function SignUp() {
             <Text className="font-bold text-base text-[18px]">
               Sign Up Using
             </Text>
-            <View className="flex-row justify-around mt-4">
-              <TouchableOpacity
-                className={`border p-2 rounded ${
-                  signUpData.selectedOption === "email" ? "bg-gray-300" : ""
-                }  `}
-                onPress={() => dispatch(setSelectedOption("email"))}
-              >
-                <Text>Email</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className={`border p-2 rounded ${
-                  signUpData.selectedOption === "phone" ? "bg-gray-300" : ""
-                }`}
-                onPress={() => dispatch(setSelectedOption("phone"))}
-              >
-                <Text>Phone number</Text>
-              </TouchableOpacity>
+            <View className="flex-row justify-around items-center mt-4">
+              <View className="flex-row items-center">
+                <Text className="mr-2">Email</Text>
+                <TouchableOpacity
+                  className={`w-6 h-6 rounded-full border ${
+                    signUpData.selectedOption === "email"
+                      ? "bg-gray-300"
+                      : "bg-transparent"
+                  } flex justify-center items-center`}
+                  onPress={() => dispatch(setSelectedOption("email"))}
+                >
+                  {signUpData.selectedOption === "email" && (
+                    <View className="w-3 h-3 rounded-full bg-black"></View>
+                  )}
+                </TouchableOpacity>
+              </View>
+              <View className="flex-row items-center">
+                <Text className="mr-2">Phone number</Text>
+                <TouchableOpacity
+                  className={`w-6 h-6 rounded-full border ${
+                    signUpData.selectedOption === "phone"
+                      ? "bg-gray-300"
+                      : "bg-transparent"
+                  } flex justify-center items-center`}
+                  onPress={() => dispatch(setSelectedOption("phone"))}
+                >
+                  {signUpData.selectedOption === "phone" && (
+                    <View className="w-3 h-3 rounded-full bg-black"></View>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -115,29 +198,42 @@ export default function SignUp() {
               />
             </View>
           )}
-          <View className=" pt-4">
+          <View className="pt-4">
             <Text>Gender</Text>
             <View className="flex-row justify-around mt-2">
               <View className="flex-row items-center">
                 <TouchableOpacity
-                  className={`border p-2 rounded mr-3 ${
-                    signUpData.gender === "male" ? "bg-gray-300" : ""
-                  }`}
+                  className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
+                    signUpData.gender === "male"
+                      ? "bg-gray-300"
+                      : "bg-transparent"
+                  } flex justify-center items-center`}
                   onPress={() => dispatch(setGender("male"))}
-                ></TouchableOpacity>
+                >
+                  {signUpData.gender === "male" && (
+                    <View className="w-3 h-3 rounded-full bg-black"></View>
+                  )}
+                </TouchableOpacity>
                 <Text>Male</Text>
               </View>
               <View className="flex-row items-center">
                 <TouchableOpacity
-                  className={`border p-2 rounded mr-3  ${
-                    signUpData.gender === "female" ? "bg-gray-300" : ""
-                  }`}
+                  className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
+                    signUpData.gender === "female"
+                      ? "bg-gray-300"
+                      : "bg-transparent"
+                  } flex justify-center items-center`}
                   onPress={() => dispatch(setGender("female"))}
-                ></TouchableOpacity>
+                >
+                  {signUpData.gender === "female" && (
+                    <View className="w-3 h-3 rounded-full bg-black"></View>
+                  )}
+                </TouchableOpacity>
                 <Text>Female</Text>
               </View>
             </View>
           </View>
+
           <View className="w-40 pt-5 ">
             <Text className="pb-2">Age</Text>
             <TextInput
@@ -148,11 +244,20 @@ export default function SignUp() {
             />
           </View>
         </View>
+
         <View className="mx-6 pt-5 px-6 font-bold text-base">
+          <Text className="pb-2">Address</Text>
+          <TextInput
+            value={signUpData.address}
+            onChangeText={(text) => dispatch(setAddress(text))}
+            placeholder="Enter your address,e.g, Ethiopia, Addis Ababa"
+            className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+          />
+
           <Text className="pb-2">Password</Text>
           <TextInput
             value={signUpData.password}
-            onChangeText={(text) => dispatch(setPassword(text))}
+            onChangeText={handlePasswordChange}
             placeholder="Enter your password"
             secureTextEntry
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
@@ -160,17 +265,26 @@ export default function SignUp() {
           <Text className="pb-2 pt-5">Confirm Password</Text>
           <TextInput
             value={signUpData.confirmPassword}
-            onChangeText={(text) => dispatch(setConfirmPassword(text))}
+            onChangeText={handleConfirmPasswordChange}
             placeholder="Enter your password"
             secureTextEntry
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
           />
+          {signUpData.passwordMismatchError && (
+            <Text style={{ color: "red", fontSize: 12 }}>
+              Passwords do not match
+            </Text>
+          )}
         </View>
         <View>
-          <Link href="/sign-up" asChild>
-            <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
+          <Link href="/profile" asChild>
+            <TouchableOpacity
+              className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
+              onPress={handleSignUp}
+              disabled={signUpData.passwordMismatchError}
+            >
               <Text className="self-center text-white text-center">
-                Sign In
+                Sign Up
               </Text>
             </TouchableOpacity>
           </Link>
@@ -201,7 +315,7 @@ export default function SignUp() {
                 </View>
               </TouchableOpacity>
             </Link>
-            <Link href="/sign-up" asChild>
+            <Link href="/profile" asChild>
               <TouchableOpacity className="border rounded-[16px] w-[160px] h-16 justify-center items-center">
                 <View className="flex-row items-center gap-2">
                   <Image
