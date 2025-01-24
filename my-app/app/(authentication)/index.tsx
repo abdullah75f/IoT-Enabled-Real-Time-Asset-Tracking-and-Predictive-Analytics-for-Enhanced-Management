@@ -15,6 +15,16 @@ export default function IntroPage() {
           if (isFirstTime === null) {
             // If it's the first time, set a flag and navigate to the landing page
             await AsyncStorage.setItem("isFirstTime", "false");
+            router.replace("/sign-in"); // Navigate to Landing Page
+          } else {
+            // If not the first time, navigate to the Sign-In page
+            router.replace("/sign-in");
+          }
+        }, 1000); // 5-second delay
+        setTimeout(async () => {
+          if (isFirstTime === null) {
+            // If it's the first time, set a flag and navigate to the landing page
+            await AsyncStorage.setItem("isFirstTime", "false");
             router.replace("/landing-Page"); // Navigate to Landing Page
           } else {
             // If not the first time, navigate to the Sign-In page
@@ -32,7 +42,10 @@ export default function IntroPage() {
   return (
     <View style={styles.container}>
       {/* App Logo */}
-      <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+      />
 
       {/* Intro Text */}
       <Text style={styles.text}>Welcome to Our App</Text>
