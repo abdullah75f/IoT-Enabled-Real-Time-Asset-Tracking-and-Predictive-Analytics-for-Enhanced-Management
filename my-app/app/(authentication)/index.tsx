@@ -21,16 +21,6 @@ export default function IntroPage() {
             router.replace("/sign-in");
           }
         }, 1000); // 5-second delay
-        setTimeout(async () => {
-          if (isFirstTime === null) {
-            // If it's the first time, set a flag and navigate to the landing page
-            await AsyncStorage.setItem("isFirstTime", "false");
-            router.replace("/landing-Page"); // Navigate to Landing Page
-          } else {
-            // If not the first time, navigate to the Sign-In page
-            router.replace("/landing-Page");
-          }
-        }, 5000); // 5-second delay
       } catch (error) {
         console.error("Error checking first-time flag:", error);
       }
