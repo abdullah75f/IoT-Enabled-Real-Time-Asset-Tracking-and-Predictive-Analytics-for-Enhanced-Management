@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {
   View,
   Text,
@@ -98,7 +98,19 @@ export default function SignUp() {
       };
 
       const response = await createUser(userData);
-      console.log("User created:", response);
+      Alert.alert(
+        "Success",
+        "Successful Registration!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/(authentication)/sign-in");
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     } catch (error: any) {
       Alert.alert(
         "Error",
@@ -277,18 +289,13 @@ export default function SignUp() {
           )}
         </View>
         <View>
-
-          <Link href="/(authentication)/otp-input" asChild>
-            <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
-              onPress={handleSignUp}
-              disabled={signUpData.passwordMismatchError}
-            >
-
-              <Text className="self-center text-white text-center">
-                Sign Up
-              </Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+            className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
+            onPress={handleSignUp}
+            disabled={signUpData.passwordMismatchError}
+          >
+            <Text className="self-center text-white text-center">Sign Up</Text>
+          </TouchableOpacity>
         </View>
         <View className="flex-row justify-center items-center mt-6">
           <Text>Have an account?</Text>
