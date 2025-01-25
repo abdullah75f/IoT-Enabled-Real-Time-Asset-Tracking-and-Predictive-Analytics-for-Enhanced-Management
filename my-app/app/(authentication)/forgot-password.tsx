@@ -59,7 +59,7 @@ export default function ForgotPassword() {
         </Link>
         <View className="flex-row justify-center items-center mt-7">
           <Text>Remembered password?</Text>
-          <Link href="/" asChild>
+          <Link href="/(authentication)/sign-in" asChild>
             <TouchableOpacity>
               <Text className="font-bold"> Sign in</Text>
             </TouchableOpacity>
