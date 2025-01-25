@@ -17,7 +17,7 @@ export default function OTPVerification() {
   // Refs for the OTP inputs
   const otpRefs = useRef([]);
 
-  const handleOtpChange = (text, index) => {
+  const handleOtpChange = (text: any, index: any) => {
     const newOtp = [...otp];
     newOtp[index] = text;
     setOtp(newOtp);
