@@ -5,7 +5,7 @@ type SignUpState = {
   lastName: string;
   email: string;
   phoneNumber: string;
-  gender: "male" | "female";
+  gender: "Male" | "Female";
   age: string;
   address: string;
   password: string;
@@ -19,7 +19,7 @@ const initialState: SignUpState = {
   lastName: "",
   email: "",
   phoneNumber: "",
-  gender: "male",
+  gender: "Male",
   age: "",
   address: "",
   password: "",
@@ -44,7 +44,7 @@ const signUpSlice = createSlice({
     setPhoneNumber: (state, action: PayloadAction<string>) => {
       state.phoneNumber = action.payload;
     },
-    setGender: (state, action: PayloadAction<"male" | "female">) => {
+    setGender: (state, action: PayloadAction<"Male" | "Female">) => {
       state.gender = action.payload;
     },
     setAge: (state, action: PayloadAction<string>) => {

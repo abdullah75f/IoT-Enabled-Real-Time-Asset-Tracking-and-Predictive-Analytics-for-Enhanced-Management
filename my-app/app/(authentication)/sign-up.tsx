@@ -81,7 +81,6 @@ export default function SignUp() {
       gender,
       age,
       password,
-      confirmPassword,
       address,
     } = signUpData;
 
@@ -97,6 +96,7 @@ export default function SignUp() {
         address,
       };
 
+      console.log("hiii userId:", userData);
       const response = await createUser(userData);
       Alert.alert(
         "Success",
@@ -216,13 +216,13 @@ export default function SignUp() {
               <View className="flex-row items-center">
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
-                    signUpData.gender === "male"
+                    signUpData.gender === "Male"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
-                  onPress={() => dispatch(setGender("male"))}
+                  onPress={() => dispatch(setGender("Male"))}
                 >
-                  {signUpData.gender === "male" && (
+                  {signUpData.gender === "Male" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
@@ -231,13 +231,13 @@ export default function SignUp() {
               <View className="flex-row items-center">
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
-                    signUpData.gender === "female"
+                    signUpData.gender === "Female"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
-                  onPress={() => dispatch(setGender("female"))}
+                  onPress={() => dispatch(setGender("Female"))}
                 >
-                  {signUpData.gender === "female" && (
+                  {signUpData.gender === "Female" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
