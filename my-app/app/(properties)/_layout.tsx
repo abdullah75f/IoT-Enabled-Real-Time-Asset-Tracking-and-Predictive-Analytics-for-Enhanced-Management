@@ -1,14 +1,16 @@
 import { Stack } from "expo-router";
 
 export default function PropertiesLayout() {
-  <Stack>
-    <Stack.Screen
-      name="asset-history"
-      options={{ headerShown: true, title: "Asset History" }}
-    />
-    <Stack.Screen
-      name="notifications"
-      options={{ headerShown: true, title: "Notifications" }}
-    />
-  </Stack>;
+  return (
+    <Stack>
+      <Stack.Screen
+        name="asset-history"
+        options={{ headerShown: true, title: "Asset History" }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{ headerShown: true, title: "Notifications" }}
+      />
+    </Stack>
+  );
 }
