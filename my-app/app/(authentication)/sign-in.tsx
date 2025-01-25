@@ -68,7 +68,7 @@ export default function SignIn() {
         </Link>
       </View>
       <View>
-        <Link href="/(landing)/home-page" asChild>
+        <Link href="/(landing)/landing-Page" asChild>
           <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
             <Text className="self-center text-white text-center">Sign In</Text>
           </TouchableOpacity>
