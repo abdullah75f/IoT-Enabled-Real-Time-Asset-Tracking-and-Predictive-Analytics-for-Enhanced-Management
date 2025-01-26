@@ -15,10 +15,10 @@ export default function IntroPage() {
           if (isFirstTime === null) {
             // If it's the first time, set a flag and navigate to the landing page
             await AsyncStorage.setItem("isFirstTime", "false");
-            router.replace("/sign-in"); // Navigate to Landing Page
+            router.replace("/(landing)/landing-Page"); // Navigate to Landing Page
           } else {
             // If not the first time, navigate to the Sign-In page
-            router.replace("/sign-in");
+            router.replace("/(landing)/landing-Page");
           }
         }, 1000); // 5-second delay
       } catch (error) {
