@@ -13,9 +13,9 @@ export default function HomePage() {
         You have [X] assets tracked.
       </Text>
       <Image
-        source={{ uri: "https://via.placeholder.com/300x200" }}
-        style={{ width: "100%", height: 200, marginTop: 20 }}
-      />
+  source={require('./map00.webp')} // Replace with the relative path to your image file
+  style={{ height: 300, marginTop: 20, width: 340, marginLeft: 20 }}
+/>
       <View className="mt-8 mx-6">
         <TouchableOpacity
           onPress={() => router.push("/(landing)/tracking-page")}

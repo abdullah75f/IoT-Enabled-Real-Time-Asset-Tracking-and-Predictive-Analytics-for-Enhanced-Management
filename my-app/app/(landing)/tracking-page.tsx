@@ -5,13 +5,13 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 
 export default function TrackingPage() {
   return (
-    <View className="flex-1 justify-start pt-24">
+    <View className="flex-1 justify-start pt-10">
       <Text className="text-black self-center font-bold text-[24px]">
         Asset Tracking
       </Text>
-      <Image
-        source={{ uri: "https://via.placeholder.com/300x200" }}
-        style={{ width: "100%", height: 200, marginTop: 20 }}
+       <Image
+        source={require('./map000.png')} // Replace with the relative path to your image file
+        style={{ height: 400, marginTop: 20, width: 100% }}
       />
       <TouchableOpacity
         onPress={() => router.push("/(properties)/asset-history")}
