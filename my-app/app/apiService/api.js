@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  // baseURL: "http://localhost:3000",
+  baseURL: "http://192.168.53.251:3000",
 });
 
 export const createUser = async (userData) => {
@@ -16,7 +17,7 @@ export const createUser = async (userData) => {
 
 export const uploadProfilePicture = async (formData) => {
   formData.append("userId", userId); // Ensure userId is correctly set
-  console.log('hiii userId:', userId); // Check if it's valid
+  console.log("hiii userId:", userId); // Check if it's valid
 
   formData.append("file", fileInput.files[0]);
 

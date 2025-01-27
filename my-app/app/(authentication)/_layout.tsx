@@ -7,21 +7,27 @@ export default function AuthenticationLayout() {
         name="sign-up"
         options={{ headerShown: true, title: "Sign Up" }}
       />
+
       <Stack.Screen
-                    name="landing-Page"
-                    options={{ headerShown: true, title: "Landing Page" }}
-                  />
-       <Stack.Screen
-              name="sign-In"
-              options={{ headerShown: true, title: "Sign In" }}
-            />
+        name="sign-in"
+        options={{ headerShown: true, title: "Sign In" }}
+      />
       <Stack.Screen
         name="forgot-password"
         options={{ headerShown: true, title: "Forgot Password" }}
       />
       <Stack.Screen
         name="index"
-        options={{ headerShown: true, title: "Sign In" }}
+        options={{ headerShown: true, title: "Intro" }}
+      />
+
+      <Stack.Screen
+        name="otp-input"
+        options={{ headerShown: true, title: "OTP" }}
+      />
+      <Stack.Screen
+        name="password-change"
+        options={{ headerShown: true, title: "password Change" }}
       />
     </Stack>
   );
