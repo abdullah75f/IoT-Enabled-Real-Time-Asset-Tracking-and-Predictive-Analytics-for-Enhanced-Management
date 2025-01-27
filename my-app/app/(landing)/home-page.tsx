@@ -1,4 +1,5 @@
 // home-page.tsx
+import Footer from "@/components/footer";
 import { router } from "expo-router";
 import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
@@ -6,6 +7,7 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 export default function HomePage() {
   return (
     <View className="flex-1 justify-start pt-24">
+      <View className="flex-1">
       <Text className="text-black self-center font-bold text-[24px]">
         Welcome, [User's Name]
       </Text>
@@ -13,7 +15,7 @@ export default function HomePage() {
         You have [X] assets tracked.
       </Text>
       <Image
-  source={require('./map00.webp')} // Replace with the relative path to your image file
+  source={require('../../assets/images/map00.webp')} // Replace with the relative path to your image file
   style={{ height: 300, marginTop: 20, width: 340, marginLeft: 20 }}
 />
       <View className="mt-8 mx-6">
@@ -32,6 +34,8 @@ export default function HomePage() {
         <TouchableOpacity className="bg-[#21252C] w-full h-12 justify-center items-center rounded-md">
           <Text className="text-white text-lg">Add New Assets</Text>
         </TouchableOpacity>
+        </View>
+        <Footer/>
       </View>
     </View>
   );
