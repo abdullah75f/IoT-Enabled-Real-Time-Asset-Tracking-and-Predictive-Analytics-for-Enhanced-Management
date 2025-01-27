@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {
   View,
   Text,
@@ -81,7 +81,6 @@ export default function SignUp() {
       gender,
       age,
       password,
-      confirmPassword,
       address,
     } = signUpData;
 
@@ -97,8 +96,21 @@ export default function SignUp() {
         address,
       };
 
+      console.log("hiii userId:", userData);
       const response = await createUser(userData);
-      console.log("User created:", response);
+      Alert.alert(
+        "Success",
+        "Successful Registration!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/(authentication)/sign-in");
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     } catch (error: any) {
       Alert.alert(
         "Error",
@@ -204,13 +216,13 @@ export default function SignUp() {
               <View className="flex-row items-center">
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
-                    signUpData.gender === "male"
+                    signUpData.gender === "Male"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
-                  onPress={() => dispatch(setGender("male"))}
+                  onPress={() => dispatch(setGender("Male"))}
                 >
-                  {signUpData.gender === "male" && (
+                  {signUpData.gender === "Male" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
@@ -219,13 +231,13 @@ export default function SignUp() {
               <View className="flex-row items-center">
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border border-gray-300 mr-3 ${
-                    signUpData.gender === "female"
+                    signUpData.gender === "Female"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
-                  onPress={() => dispatch(setGender("female"))}
+                  onPress={() => dispatch(setGender("Female"))}
                 >
-                  {signUpData.gender === "female" && (
+                  {signUpData.gender === "Female" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
@@ -277,18 +289,13 @@ export default function SignUp() {
           )}
         </View>
         <View>
-
-          <Link href="/(authentication)/otp-input" asChild>
-            <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
-              onPress={handleSignUp}
-              disabled={signUpData.passwordMismatchError}
-            >
-
-              <Text className="self-center text-white text-center">
-                Sign Up
-              </Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+            className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
+            onPress={handleSignUp}
+            disabled={signUpData.passwordMismatchError}
+          >
+            <Text className="self-center text-white text-center">Sign Up</Text>
+          </TouchableOpacity>
         </View>
         <View className="flex-row justify-center items-center mt-6">
           <Text>Have an account?</Text>
