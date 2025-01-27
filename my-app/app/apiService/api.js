@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // baseURL: "http://localhost:3000",
-  baseURL: "http://192.168.53.251:3000",
+  baseURL: "http://192.168.1.4:3000",
 });
 
 export const createUser = async (userData) => {
@@ -11,6 +11,21 @@ export const createUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error("Error creating user:", error);
+    throw error;
+  }
+};
+
+export const signIn = async (emailOrPhone, password) => {
+  try {
+    const response = await api.post("/users/signin", {
+      emailOrPhone,
+      password,
+    });
+    console.log("Sign-in response:", response); // Check the full response
+
+    return response.data;
+  } catch (error) {
+    console.error("Error signing in:", error);
     throw error;
   }
 };

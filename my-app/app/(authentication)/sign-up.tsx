@@ -96,7 +96,6 @@ export default function SignUp() {
         address,
       };
 
-      console.log("hiii userId:", userData);
       const response = await createUser(userData);
       Alert.alert(
         "Success",
