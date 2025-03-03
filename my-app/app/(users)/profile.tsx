@@ -15,6 +15,7 @@ import Footer from "@/components/footer";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSignInState } from "@/store/slices/signInSlices";
 import { uploadProfilePicture } from "@/app/apiService/api";
+import { router } from "expo-router";
 export default function Profile() {
   const dispatch = useDispatch();
   const signUpData = useSelector((state: any) => state.signUp);
@@ -96,7 +97,7 @@ export default function Profile() {
 
   return (
     <View className="flex-1 ">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}>
         <View className="flex-1 ">
           <View className="justify-center items-center">
             <Text className="font-semibold text-lg">Account</Text>
@@ -257,7 +258,19 @@ export default function Profile() {
               <TouchableOpacity
                 onPress={() => {
                   dispatch(clearSignInState());
-                  alert("You are logged out!");
+                  Alert.alert(
+                    "Success",
+                    "You are logged out!",
+                    [
+                      {
+                        text: "OK",
+                        onPress: () => {
+                          router.replace("/(authentication)/sign-in");
+                        },
+                      },
+                    ],
+                    { cancelable: false }
+                  );
                 }}
                 className="flex-row items-start ml-0 "
               >

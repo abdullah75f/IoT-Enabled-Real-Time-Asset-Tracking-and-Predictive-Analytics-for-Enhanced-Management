@@ -1,11 +1,15 @@
-import { setEmail, setPassword } from "@/store/slices/signInSlices";
+import {
+  setEmail,
+  setJwtToken,
+  setPassword,
+} from "@/store/slices/signInSlices";
 import {
   useFonts,
   Inter_400Regular,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
-import { Link } from "expo-router";
-import { useEffect } from "react";
+import { Link, router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,11 +17,14 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { signInUser } from "../apiService/api";
 export default function SignIn() {
   const dispatch = useDispatch();
   const signInData = useSelector((state: any) => state.signIn);
+  const [loading, setLoading] = useState(false);
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -38,6 +45,39 @@ export default function SignIn() {
       </View>
     );
   }
+
+  const handleSignIn = async () => {
+    if (!signInData.email || !signInData.password) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true); // Show loading indicator
+    try {
+      const data = await signInUser({
+        email: signInData.email,
+        password: signInData.password,
+      }); // Call the sign-in API
+      dispatch(setJwtToken(data.token)); // Save JWT token in Redux
+      Alert.alert(
+        "Success",
+        "Signed in successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/(landing)/home-page");
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error: any) {
+      Alert.alert("Error", error);
+    } finally {
+      setLoading(false); // Hide loading indicator
+    }
+  };
 
   return (
     <View className="flex-1 justify-start pt-24">
@@ -68,11 +108,20 @@ export default function SignIn() {
         </Link>
       </View>
       <View>
-        <Link href="/(landing)/home-page" asChild>
-          <TouchableOpacity className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
+        <TouchableOpacity
+          onPress={handleSignIn}
+          disabled={loading}
+          className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
             <Text className="self-center text-white text-center">Sign In</Text>
-          </TouchableOpacity>
-        </Link>
+          )}
+        </TouchableOpacity>
+        {/* <TouchableOpacity  className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">
+          <Text className="self-center text-white text-center">Sign In</Text>
+        </TouchableOpacity> */}
       </View>
       <View className="flex-row justify-center items-center mt-6">
         <Text>Don't have an account?</Text>

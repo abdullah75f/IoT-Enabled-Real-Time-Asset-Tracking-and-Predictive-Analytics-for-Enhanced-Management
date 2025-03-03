@@ -6,11 +6,16 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import User from './modules/users/user.entity';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1h' },
+    }),
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the configuration accessible across the app
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({

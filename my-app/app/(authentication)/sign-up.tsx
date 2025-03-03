@@ -82,30 +82,34 @@ export default function SignUp() {
       age,
       password,
       address,
+      selectedOption,
     } = signUpData;
 
     try {
-      const userData = {
+      const userData: any = {
         firstName,
         lastName,
-        email: signUpData.selectedOption === "email" ? email : null,
-        phoneNumber: signUpData.selectedOption === "phone" ? phoneNumber : null,
         gender,
         age: parseInt(age),
         password,
         address,
       };
 
-      console.log("hiii userId:", userData);
+      if (selectedOption === "email") {
+        userData.email = email;
+      } else if (selectedOption === "phone") {
+        userData.phoneNumber = phoneNumber;
+      }
+
       const response = await createUser(userData);
       Alert.alert(
         "Success",
-        "Successful Registration!",
+        "Successful Registration! Please check your email for verification.",
         [
           {
             text: "OK",
             onPress: () => {
-              router.replace("/(authentication)/sign-in");
+              router.replace("/sign-in");
             },
           },
         ],
@@ -313,28 +317,13 @@ export default function SignUp() {
         <View className="flex-1  mb-16 ">
           <View className=" flex-row justify-around">
             <Link href="/sign-up" asChild>
-              <TouchableOpacity className="border rounded-[16px] w-[160px] h-16 justify-center items-center">
+              <TouchableOpacity className="border rounded-[16px] w-[260px] h-16 justify-center items-center">
                 <View className="flex-row items-center gap-2">
                   <Image
                     source={require("../../assets/images/google-logo.png")}
                     style={{ width: 20, height: 20 }}
                   />
                   <Text className="text-lg text-black">Google</Text>
-                </View>
-              </TouchableOpacity>
-            </Link>
-            <Link href="/profile" asChild>
-              <TouchableOpacity className="border rounded-[16px] w-[160px] h-16 justify-center items-center">
-                <View className="flex-row items-center gap-2">
-                  <Image
-                    source={require("../../assets/images/PhoneIcon.png")}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: "transparent",
-                    }}
-                  />
-                  <Text className="text-lg text-black">Phone</Text>
                 </View>
               </TouchableOpacity>
             </Link>
