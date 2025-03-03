@@ -1,9 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  // baseURL: "http://localhost:3000",
   baseURL: "http://192.168.1.4:3000",
 });
+
 
 export const createUser = async (userData) => {
   try {
@@ -15,25 +15,19 @@ export const createUser = async (userData) => {
   }
 };
 
-export const signIn = async (emailOrPhone, password) => {
+export const signInUser = async (credentials) => {
   try {
-    const response = await api.post("/users/signin", {
-      emailOrPhone,
-      password,
-    });
-    console.log("Sign-in response:", response); // Check the full response
-
+    const response = await api.post("/users/signin", credentials);
     return response.data;
   } catch (error) {
-    console.error("Error signing in:", error);
-    throw error;
+    throw (
+      error.response?.data?.message || "An error occurred while signing in."
+    );
   }
 };
 
 export const uploadProfilePicture = async (formData) => {
-  formData.append("userId", userId); // Ensure userId is correctly set
-  console.log("hiii userId:", userId); // Check if it's valid
-
+  formData.append("userId", userId); 
   formData.append("file", fileInput.files[0]);
 
   try {
@@ -46,5 +40,6 @@ export const uploadProfilePicture = async (formData) => {
     throw error;
   }
 };
+
 
 export default api;
