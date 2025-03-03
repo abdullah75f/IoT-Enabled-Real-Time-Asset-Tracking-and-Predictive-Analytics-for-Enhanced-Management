@@ -27,17 +27,24 @@ export class UsersService {
   private verificationTokens = new Map<string, any>(); // Store unverified users temporarily
 
   async createUser(createUserDto: any): Promise<{ message: string }> {
-    const { email, password, firstName, lastName, gender, age, address } =
+    const { email, password,phoneNumber, firstName, lastName, gender, age, address } =
       createUserDto;
 
-    // Check if user already exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email },
-    });
+      const existingUser = await this.userRepository.findOne({
+        where: [{ email }, { phoneNumber }],
+      });
 
-    if (existingUser) {
-      throw new BadRequestException('A user with this email already exists.');
-    }
+      if (existingUser) {
+        if (existingUser.email === email) {
+          throw new BadRequestException('A user with this email already exists.');
+        }
+  
+        if (existingUser.phoneNumber === phoneNumber) {
+          throw new BadRequestException(
+            'A user with this phone number already exists.',
+          );
+        }
+      }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,6 +56,7 @@ export class UsersService {
       lastName,
       email,
       gender,
+      phoneNumber,
       address,
       age,
       passwordHash: hashedPassword,
