@@ -20,10 +20,15 @@ export class UsersController {
     return this.usersService.verifyEmail(token, res);
   }
 
-  // @Post('signin')
-  // async signIn(
-  //   @Body() signInDto: SignInDto,
-  // ): Promise<{ accessToken: string; expiresIn: number }> {
-  //   return this.userService.signIn(signInDto);
-  // }
+  @Post('google-signup')
+  async googleSignup(@Body('token') token: string) {
+    return this.usersService.googleSignup(token);
+  }
+
+  @Post('signin')
+  async signIn(
+    @Body() signInDto: SignInDto,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    return this.usersService.signIn(signInDto);
+  }
 }

@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, router } from "expo-router";
 import {
   View,
@@ -26,7 +27,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import { Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
 import { useEffect, useState } from "react";
-import { createUser } from "@/app/apiService/api";
+import { createUser, googleSignup } from "@/app/apiService/api";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
+import { makeRedirectUri } from "expo-auth-session";
 
 export default function SignUp() {
   const [loading, setLoading] = useState(true);
@@ -36,6 +41,20 @@ export default function SignUp() {
     Inter_400Regular,
     Inter_700Bold,
   });
+
+  WebBrowser.maybeCompleteAuthSession();
+
+  // const redirectUri = AuthSession.makeRedirectUri(); // Generate the redirect URI automatically
+  // console.log("Redirect URI:", redirectUri);
+  const redirectUri = "https://auth.expo.io/@abdullah75f/iot-asset-tracking";
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId:
+      "564302230889-ffdhehch5so4o6csbb9mc0ub4ef22f9e.apps.googleusercontent.com", // Your Web Client ID
+    scopes: ["profile", "email"],
+    redirectUri: redirectUri, // Your Redirect URI
+  });
+
   useEffect(() => {
     const initialize = async () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -49,6 +68,53 @@ export default function SignUp() {
       dispatch(setPassword(""));
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    console.log("Response: ", response); // Log the response
+    if (response?.type === "success") {
+      const accessToken = response.authentication?.accessToken;
+      if (accessToken) {
+        handleGoogleSignUp(accessToken);
+      } else {
+        console.error("Google Auth Error: No access token found.");
+        Alert.alert("Error", "Google Sign-In failed. Please try again.");
+      }
+    } else if (response?.type === "error") {
+      console.error("Google Auth Error:", response.error);
+      Alert.alert("Error", "Google Sign-In failed. Please try again.");
+    }
+  }, [response]);
+
+  // Function to handle sign-up or sign-in with the Google token
+  const handleGoogleSignUp = async (token: string) => {
+    if (!token) {
+      Alert.alert("Google Sign-Up Failed", "No token received.");
+      return;
+    }
+
+    try {
+      console.log("Sending token to backend:", token);
+      // Send the token to your backend for user authentication or sign-up
+      const response = await googleSignup(token); // Call your backend API
+      Alert.alert(
+        "Success",
+        "Account created successfully with Google!",
+        [{ text: "OK", onPress: () => router.replace("/sign-in") }],
+        { cancelable: false }
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message || "Google sign-up failed. Try again."
+      );
+    }
+  };
+
+  // Function to trigger the Google OAuth flow
+  const handleGoogleSignIn = () => {
+    console.log("Google Sign-In Button Pressed");
+    promptAsync(); // This triggers the OAuth process
+  };
 
   const handlePasswordChange = (password: string) => {
     dispatch(setPassword(password));
@@ -316,17 +382,18 @@ export default function SignUp() {
         </View>
         <View className="flex-1  mb-16 ">
           <View className=" flex-row justify-around">
-            <Link href="/sign-up" asChild>
-              <TouchableOpacity className="border rounded-[16px] w-[260px] h-16 justify-center items-center">
-                <View className="flex-row items-center gap-2">
-                  <Image
-                    source={require("../../assets/images/google-logo.png")}
-                    style={{ width: 20, height: 20 }}
-                  />
-                  <Text className="text-lg text-black">Google</Text>
-                </View>
-              </TouchableOpacity>
-            </Link>
+            <TouchableOpacity
+              className="border rounded-[16px] w-[260px] h-16 justify-center items-center"
+              onPress={handleGoogleSignIn} // Trigger Google Sign-In here
+            >
+              <View className="flex-row items-center gap-2">
+                <Image
+                  source={require("../../assets/images/google-logo.png")}
+                  style={{ width: 20, height: 20 }}
+                />
+                <Text className="text-lg text-black">Google</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

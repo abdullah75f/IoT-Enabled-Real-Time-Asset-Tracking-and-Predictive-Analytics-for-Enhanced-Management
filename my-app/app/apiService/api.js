@@ -1,9 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.4:3000",
+  baseURL: "http://192.168.1.8:3000",
 });
-
 
 export const createUser = async (userData) => {
   try {
@@ -12,6 +11,17 @@ export const createUser = async (userData) => {
   } catch (error) {
     console.error("Error creating user:", error);
     throw error;
+  }
+};
+
+export const googleSignup = async (token) => {
+  try {
+    const response = await axios.post(`${API_URL}/users/google-signup`, {
+      token,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Google sign-up failed.");
   }
 };
 
@@ -27,7 +37,7 @@ export const signInUser = async (credentials) => {
 };
 
 export const uploadProfilePicture = async (formData) => {
-  formData.append("userId", userId); 
+  formData.append("userId", userId);
   formData.append("file", fileInput.files[0]);
 
   try {
@@ -40,6 +50,5 @@ export const uploadProfilePicture = async (formData) => {
     throw error;
   }
 };
-
 
 export default api;
