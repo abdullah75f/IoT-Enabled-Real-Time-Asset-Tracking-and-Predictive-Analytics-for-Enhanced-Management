@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GenderEnum } from '../enum/gender-enum';
 import { Matches } from 'class-validator';
 
@@ -30,10 +30,10 @@ export default class User {
   })
   gender: GenderEnum;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
 
-  @Column()
+  @Column({ nullable: true })
   age: string;
 
   @Column({ nullable: true })

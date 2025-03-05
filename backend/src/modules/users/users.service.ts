@@ -25,26 +25,35 @@ export class UsersService {
   ) {}
 
   private verificationTokens = new Map<string, any>(); // Store unverified users temporarily
+  private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   async createUser(createUserDto: any): Promise<{ message: string }> {
-    const { email, password,phoneNumber, firstName, lastName, gender, age, address } =
-      createUserDto;
+    const {
+      email,
+      password,
+      phoneNumber,
+      firstName,
+      lastName,
+      gender,
+      age,
+      address,
+    } = createUserDto;
 
-      const existingUser = await this.userRepository.findOne({
-        where: [{ email }, { phoneNumber }],
-      });
+    const existingUser = await this.userRepository.findOne({
+      where: [{ email }, { phoneNumber }],
+    });
 
-      if (existingUser) {
-        if (existingUser.email === email) {
-          throw new BadRequestException('A user with this email already exists.');
-        }
-  
-        if (existingUser.phoneNumber === phoneNumber) {
-          throw new BadRequestException(
-            'A user with this phone number already exists.',
-          );
-        }
+    if (existingUser) {
+      if (existingUser.email === email) {
+        throw new BadRequestException('A user with this email already exists.');
       }
+
+      if (existingUser.phoneNumber === phoneNumber) {
+        throw new BadRequestException(
+          'A user with this phone number already exists.',
+        );
+      }
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -69,7 +78,7 @@ export class UsersService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const verificationLink = `http://192.168.1.4:3000/users/verify-email?token=${token}`;
+    const verificationLink = `http://192.168.1.8:3000/users/verify-email?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
@@ -82,7 +91,7 @@ export class UsersService {
     const userData = this.verificationTokens.get(token);
 
     if (!userData) {
-      return res.redirect('http://192.168.1.4:5173/sign-in?verified=true');
+      return res.redirect('http://192.168.1.8:5173/sign-in?verified=true');
     }
 
     // Save user to database
@@ -96,65 +105,74 @@ export class UsersService {
     this.verificationTokens.delete(token); // Remove from temporary storage
 
     // Redirect to frontend sign-in page
-    return res.redirect('http://192.168.1.4:5173/sign-in?verified=true');
+    return res.redirect('http://192.168.1.8:5173/sign-in?verified=true');
   }
 
-  // async googleAuth(
-  //   token: string,
-  // ): Promise<{ accessToken: string; expiresIn: number }> {
-  //   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-  //   const ticket = await client.verifyIdToken({
-  //     idToken: token,
-  //     audience: process.env.GOOGLE_CLIENT_ID,
-  //   });
-  //   const payload = ticket.getPayload();
+  async googleSignup(token: string) {
+    try {
+      // Fetch user info from Google
+      const userInfoResponse = await fetch(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const userInfo = await userInfoResponse.json();
 
-  //   if (!payload) {
-  //     throw new UnauthorizedException('Google authentication failed');
-  //   }
+      const { email, given_name, family_name, id } = userInfo;
 
-  //   const { email, given_name, family_name } = payload;
-  //   let user = await this.userRepository.findOne({ where: { email } });
+      // Check if user already exists
+      let user = await this.userRepository.findOne({ where: { email } });
 
-  //   if (!user) {
-  //     user = this.userRepository.create({
-  //       email,
-  //       firstName: given_name,
-  //       lastName: family_name,
-  //       isEmailVerified: true,
-  //     });
-  //     await this.userRepository.save(user);
-  //   }
+      if (!user) {
+        // Create new user
+        user = this.userRepository.create({
+          email,
+          firstName: given_name,
+          lastName: family_name,
+          googleId: id,
+          isEmailVerified: true, // Google verifies the email
+        });
+        await this.userRepository.save(user);
+      }
 
-  //   const accessToken = this.jwtService.sign({
-  //     userId: user.userId,
-  //     email: user.email,
-  //   });
-  //   return { accessToken, expiresIn: 3600 };
-  // }
+      // Generate JWT tokens
+      const accessToken = this.jwtService.sign({
+        userId: user.userId,
+        email: user.email,
+      });
+      const refreshToken = this.jwtService.sign(
+        { userId: user.userId },
+        { expiresIn: '7d' },
+      );
 
-  // // async signIn(
-  // //   signInDto: SignInDto,
-  // // ): Promise<{ accessToken: string; expiresIn: number }> {
-  // //   const { emailOrPhone, password } = signInDto;
-  // //   const user = await this.userRepository.findOne({
-  // //     where: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
-  // //   });
+      return { accessToken, refreshToken, expiresIn: 3600 };
+    } catch (error) {
+      throw new UnauthorizedException('Google sign-up failed.');
+    }
+  }
 
-  // //   if (!user) {
-  // //     throw new UnauthorizedException('Invalid credentials.');
-  // //   }
+  async signIn(
+    signInDto: SignInDto,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    const { email, password } = signInDto;
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
 
-  // //   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  // //   if (!isPasswordValid) {
-  // //     throw new UnauthorizedException('Invalid credentials.');
-  // //   }
+    if (!user) {
+      throw new UnauthorizedException('Please Register before trying to login.');
+    }
 
-  // //   const payload = { userId: user.userId, email: user.email };
-  // //   const accessToken = this.jwtService.sign(payload);
-  // //   const expiresIn = 3600;
-  // // 
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
 
-  // //   return { accessToken, expiresIn };
-  // // }
+    const payload = { userId: user.userId, email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+    const expiresIn = 3600;
+
+    return { accessToken, expiresIn };
+  }
 }
