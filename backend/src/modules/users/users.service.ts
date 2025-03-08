@@ -78,7 +78,7 @@ export class UsersService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const verificationLink = `http://192.168.1.8:3000/users/verify-email?token=${token}`;
+    const verificationLink = `http://192.168.1.6:3000/users/verify-email?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
@@ -91,7 +91,7 @@ export class UsersService {
     const userData = this.verificationTokens.get(token);
 
     if (!userData) {
-      return res.redirect('http://192.168.1.8:5173/sign-in?verified=true');
+      return res.redirect('http://192.168.1.6:5173/sign-in?verified=true');
     }
 
     // Save user to database
@@ -105,7 +105,7 @@ export class UsersService {
     this.verificationTokens.delete(token); // Remove from temporary storage
 
     // Redirect to frontend sign-in page
-    return res.redirect('http://192.168.1.8:5173/sign-in?verified=true');
+    return res.redirect('http:/192.168.1.6:5173/sign-in?verified=true');
   }
 
   async googleSignup(token: string) {
@@ -161,7 +161,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Please Register before trying to login.');
+      throw new UnauthorizedException(
+        'Please Register before trying to login.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
@@ -174,5 +176,25 @@ export class UsersService {
     const expiresIn = 3600;
 
     return { accessToken, expiresIn };
+  }
+
+  async findOneById(userId: string): Promise<User> {
+    return this.userRepository.findOne({ where: { userId } });
+  }
+
+  async getProfile(userId: string): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+    const {
+      passwordHash,
+      emailVerificationToken,
+      googleId,
+      isEmailVerified,
+      createdAt,
+      ...safeUserData
+    } = user;
+    return safeUserData;
   }
 }

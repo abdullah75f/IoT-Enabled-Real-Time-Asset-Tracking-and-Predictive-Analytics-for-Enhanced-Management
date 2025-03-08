@@ -18,27 +18,14 @@ import { uploadProfilePicture } from "@/app/apiService/api";
 import { router } from "expo-router";
 export default function Profile() {
   const dispatch = useDispatch();
-  const signUpData = useSelector((state: any) => state.signUp);
+  const signInData = useSelector((state: any) => state.signIn.user);
+  const jwtToken = useSelector((state: any) => state.signIn.jwtToken);
 
-  // const [editedSignUpData, setEditedSignUpData] = useState({
-  //   firstName: signUpData.firstName,
-  //   lastName: signUpData.lastName,
-  //   email: signUpData.email,
-  //   phoneNumber: signUpData.phoneNumber,
-  //   gender: signUpData.gender,
-  //   age: signUpData.age,
-  //   address: signUpData.address,
-  //   password: signUpData.password,
-  //   confirmPassword: signUpData.confirmPassword,
-  //   selectedOption: signUpData.selectedOption,
-  // });
-
-  const [currentPosition, setCurrentPosition] = useState(""); // it will be removed
-
+  const [currentPosition, setCurrentPosition] = useState("");
   const [countryCode, setCountryCode] = useState("Code");
   const [expanded, setExpanded] = useState(false);
-
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+
   const toggleExpanded = useCallback(() => setExpanded(!expanded), [expanded]);
 
   const items = [
@@ -82,19 +69,22 @@ export default function Profile() {
         name: fileName,
         type: `image/${fileExtension}`,
       } as any);
-      console.log("signUpData.id:", signUpData.id); // Check the value of userId
 
-      formData.append("userId", signUpData.id);
-      console.log("Form Data:", formData); // Debug form data to check the userId
+      formData.append("userId", signInData.userId);
 
       const response = await uploadProfilePicture(formData);
       Alert.alert("Success", "Profile picture uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading profile picture:", error);
       Alert.alert("Error", "Failed to upload profile picture.");
     }
   };
-
+  // Single function to calculate dynamic width based on text length
+  const getTextWidth = (text: string | null) => {
+    if (!text) return 100; // Minimum width if empty
+    const baseWidth = 10; // Base padding
+    const charWidth = 8; // Approximate width per character (adjust as needed)
+    return baseWidth + text.length * charWidth;
+  };
   return (
     <View className="flex-1 ">
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}>
@@ -119,7 +109,7 @@ export default function Profile() {
                 <View className="mb-4">
                   <Text className="font-semibold">First Name</Text>
                   <TextInput
-                    value={signUpData.firstName}
+                    value={signInData.firstName || ""}
                     editable={false}
                     placeholder="Enter your first name"
                     className="rounded border border-gray-300 border-solid p-2 my-2"
@@ -128,7 +118,7 @@ export default function Profile() {
                 <View className="mb-4">
                   <Text className="font-semibold">Last Name</Text>
                   <TextInput
-                    value={signUpData.lastName}
+                    value={signInData.lastName || ""}
                     editable={false}
                     placeholder="Enter your last name"
                     className="rounded border border-gray-300 border-solid p-2 my-2"
@@ -137,9 +127,11 @@ export default function Profile() {
               </View>
 
               <TouchableOpacity onPress={selectProfilePicture} className="ml-6">
-                {profilePicture ? (
+                {profilePicture || signInData.profilePicture ? (
                   <Image
-                    source={{ uri: profilePicture }}
+                    source={{
+                      uri: profilePicture || signInData.profilePicture,
+                    }}
                     className="w-24 h-24 rounded-full"
                   />
                 ) : (
@@ -155,17 +147,23 @@ export default function Profile() {
             </View>
             <View className="mb-4">
               <Text className="font-semibold">Email</Text>
-              <TextInput
-                value={signUpData.email}
-                editable={false}
-                placeholder="Enter your email"
-                className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
-              />
+              <Text
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                  borderRadius: 4,
+                  padding: 8,
+                  marginVertical: 4,
+                  width: getTextWidth(signInData.email), // Using getTextWidth
+                }}
+              >
+                {signInData.email || "Enter your email"}
+              </Text>
             </View>
             <View className="mb-4">
               <Text className="font-semibold">Gender</Text>
               <TextInput
-                value={signUpData.gender}
+                value={signInData.gender || ""}
                 editable={false}
                 placeholder="Enter your Gender"
                 className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
@@ -174,7 +172,7 @@ export default function Profile() {
             <View className="mb-4">
               <Text className="font-semibold">Age</Text>
               <TextInput
-                value={signUpData.age}
+                value={signInData.age || ""}
                 editable={false}
                 placeholder="Enter your Age"
                 className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
@@ -183,12 +181,18 @@ export default function Profile() {
 
             <View className="mb-4">
               <Text className="font-semibold">Address</Text>
-              <TextInput
-                value={signUpData.address}
-                editable={false}
-                placeholder="Enter your Address"
-                className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
-              />
+              <Text
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                  borderRadius: 4,
+                  padding: 8,
+                  marginVertical: 4,
+                  width: getTextWidth(signInData.address), // Using getTextWidth
+                }}
+              >
+                {signInData.address || "Enter your Address"}
+              </Text>
             </View>
 
             <View className="mb-4">
@@ -204,56 +208,29 @@ export default function Profile() {
             <View className="mb-10">
               <Text className="font-semibold">Phone Number</Text>
               <View className="flex-row justify-between items-center">
-                {/* <TouchableOpacity
-                  onPress={toggleExpanded}
-                  className=" flex-row justify-between border border-gray-300 p-2 w-30 "
-                  activeOpacity={0.8}
-                >
-                  <Text>{countryCode}</Text>
-                  <AntDesign
-                    name={expanded ? "caretup" : "caretdown"}
-                    className="px-1"
-                  />
-                </TouchableOpacity>
-                {expanded ? (
-                  <View className="absolute top-[40px] w-[250px] p-2.5 ">
-                    <FlatList
-                      keyExtractor={(item) => item.label}
-                      data={[
-                        { label: "Select code", value: "Select code" },
-                        { label: "+251", value: "+251" },
-                        { label: "+1", value: "+1" },
-                      ]}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          onPress={() => {
-                            setCountryCode(item.value);
-                            toggleExpanded();
-                          }}
-                          className="mb-2 border border-gray-300 w-28 p-1"
-                          activeOpacity={0.8}
-                        >
-                          <Text>{item.value}</Text>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </View>
-                ) : null} */}
                 <TextInput
                   editable={false}
                   placeholder="+251"
                   className="flex-row justify-between border border-gray-300 p-2 w-[70]"
                 />
                 <TextInput
-                  value={signUpData.phoneNumber}
+                  value={signInData.phoneNumber || ""}
                   editable={false}
                   placeholder=" your phone number"
                   className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-3/5"
                 />
               </View>
             </View>
-            <Text className="font-semibold mb-7">Last Updated:</Text>
-            {/* the above will be displayed from the backend */}
+            <View className="mb-4">
+              <Text className="font-semibold">Last Updated:</Text>
+              <TextInput
+                value={signInData.lastUpdatedAt || ""}
+                editable={false}
+                placeholder=""
+                className="rounded border border-gray-300 border-solid p-2 my-2"
+              />
+            </View>
+
             <View className="flex-1 flex-row justify-between m">
               <TouchableOpacity
                 onPress={() => {
@@ -279,15 +256,6 @@ export default function Profile() {
                   Log Out
                 </Text>
               </TouchableOpacity>
-              {/* <TouchableOpacity
-                onPress={handleSave}
-                className="flex-row items-start ml-0"
-              >
-                <FontAwesome name="save" size={24} color="black" />
-                <Text className="text-green-500 font-bold text-2xl ml-2">
-                  Save
-                </Text>
-              </TouchableOpacity> */}
             </View>
           </View>
         </View>
