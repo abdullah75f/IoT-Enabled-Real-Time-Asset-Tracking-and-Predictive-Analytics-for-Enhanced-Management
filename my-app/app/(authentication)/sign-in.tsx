@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserProfile, signInUser } from "../apiService/api";
+import store from "../../store/store";
 export default function SignIn() {
   const dispatch = useDispatch();
   const signInData = useSelector((state: any) => state.signIn);
@@ -60,6 +61,10 @@ export default function SignIn() {
         password: signInData.password,
       });
       dispatch(setJwtToken(accessToken));
+      console.log(
+        "(NOBRIDGE) LOG State after token dispatch:",
+        store.getState().signIn
+      );
       const userData = await fetchUserProfile();
       dispatch(setSignInData({ jwtToken: accessToken, user: userData }));
 
