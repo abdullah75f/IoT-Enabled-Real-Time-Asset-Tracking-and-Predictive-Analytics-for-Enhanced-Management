@@ -28,7 +28,7 @@ export default function SignIn() {
   const signInData = useSelector((state: any) => state.signIn);
   const [loading, setLoading] = useState(false);
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({ 
     Inter_400Regular,
     Inter_700Bold,
   });
