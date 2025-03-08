@@ -2,6 +2,7 @@ import {
   setEmail,
   setJwtToken,
   setPassword,
+  setSignInData,
 } from "@/store/slices/signInSlices";
 import {
   useFonts,
@@ -20,7 +21,7 @@ import {
   Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { signInUser } from "../apiService/api";
+import { fetchUserProfile, signInUser } from "../apiService/api";
 export default function SignIn() {
   const dispatch = useDispatch();
   const signInData = useSelector((state: any) => state.signIn);
@@ -51,14 +52,17 @@ export default function SignIn() {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-
     setLoading(true); // Show loading indicator
+
     try {
-      const data = await signInUser({
+      const { accessToken } = await signInUser({
         email: signInData.email,
         password: signInData.password,
-      }); // Call the sign-in API
-      dispatch(setJwtToken(data.token)); // Save JWT token in Redux
+      });
+      dispatch(setJwtToken(accessToken));
+      const userData = await fetchUserProfile();
+      dispatch(setSignInData({ jwtToken: accessToken, user: userData }));
+
       Alert.alert(
         "Success",
         "Signed in successfully!",
@@ -73,7 +77,10 @@ export default function SignIn() {
         { cancelable: false }
       );
     } catch (error: any) {
-      Alert.alert("Error", error);
+      Alert.alert(
+        "Error",
+        error.message || "An error occurred while signing in."
+      );
     } finally {
       setLoading(false); // Hide loading indicator
     }

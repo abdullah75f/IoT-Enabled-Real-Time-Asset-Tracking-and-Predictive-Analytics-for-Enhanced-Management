@@ -70,7 +70,6 @@ export default function SignUp() {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("Response: ", response); // Log the response
     if (response?.type === "success") {
       const accessToken = response.authentication?.accessToken;
       if (accessToken) {
@@ -93,9 +92,7 @@ export default function SignUp() {
     }
 
     try {
-      console.log("Sending token to backend:", token);
-      // Send the token to your backend for user authentication or sign-up
-      const response = await googleSignup(token); // Call your backend API
+      const response = await googleSignup(token);
       Alert.alert(
         "Success",
         "Account created successfully with Google!",
@@ -112,7 +109,6 @@ export default function SignUp() {
 
   // Function to trigger the Google OAuth flow
   const handleGoogleSignIn = () => {
-    console.log("Google Sign-In Button Pressed");
     promptAsync(); // This triggers the OAuth process
   };
 

@@ -3,10 +3,11 @@ import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
-import { AuthenticationModule } from './modules/authentication/authentication.module';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 import User from './modules/users/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
     }),
     UsersModule,
-    AuthenticationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

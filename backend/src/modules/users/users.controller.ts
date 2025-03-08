@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import User from './user.entity';
 import { UsersService } from './users.service';
 import { SignInDto } from './dto/sign-in.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -30,5 +32,11 @@ export class UsersController {
     @Body() signInDto: SignInDto,
   ): Promise<{ accessToken: string; expiresIn: number }> {
     return this.usersService.signIn(signInDto);
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@GetUser() user: User) {
+    return this.usersService.getProfile(user.userId);
   }
 }
