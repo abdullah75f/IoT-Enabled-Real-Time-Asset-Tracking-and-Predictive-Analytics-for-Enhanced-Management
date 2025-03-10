@@ -14,6 +14,8 @@ import User from './user.entity';
 import { OAuth2Client } from 'google-auth-library';
 import { SignInDto } from './dto/sign-in.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import * as fs from 'fs/promises';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class UsersService {
@@ -78,7 +80,7 @@ export class UsersService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const verificationLink = `http://192.168.1.6:3000/users/verify-email?token=${token}`;
+    const verificationLink = `http://192.168.1.4:3000/users/verify-email?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
@@ -91,7 +93,7 @@ export class UsersService {
     const userData = this.verificationTokens.get(token);
 
     if (!userData) {
-      return res.redirect('http://192.168.1.6:5173/sign-in?verified=true');
+      return res.redirect('http://192.168.1.4:5173/sign-in?verified=true');
     }
 
     // Save user to database
@@ -105,7 +107,7 @@ export class UsersService {
     this.verificationTokens.delete(token); // Remove from temporary storage
 
     // Redirect to frontend sign-in page
-    return res.redirect('http:/192.168.1.6:5173/sign-in?verified=true');
+    return res.redirect('http:/192.168.1.4:5173/sign-in?verified=true');
   }
 
   async googleSignup(token: string) {
@@ -196,5 +198,36 @@ export class UsersService {
       ...safeUserData
     } = user;
     return safeUserData;
+  }
+
+  async updateProfilePicture(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      const uploadResult = await cloudinary.uploader.upload(file.path, {
+        folder: 'profile_pictures',
+        public_id: `user_${userId}`,
+        overwrite: true,
+        fetch_format: 'auto',
+        quality: 'auto',
+      });
+
+      const profilePictureUrl = uploadResult.secure_url;
+
+      await this.userRepository.update(
+        { userId },
+        {
+          profilePicture: profilePictureUrl,
+          lastUpdatedAt: new Date().toISOString(),
+        },
+      );
+
+      await fs.unlink(file.path); // Clean up temporary file
+      return profilePictureUrl;
+    } catch (error) {
+      await fs.unlink(file.path).catch(() => {}); // Clean up on error
+      throw error;
+    }
   }
 }
