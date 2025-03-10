@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.6:3000",
+  baseURL: "http://192.168.1.4:3000",
 });
 
 api.interceptors.request.use(
@@ -16,7 +16,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
-); 
+);
 
 export const createUser = async (userData) => {
   try {
@@ -58,21 +58,6 @@ export const signInUser = async (credentials) => {
   }
 };
 
-export const uploadProfilePicture = async (formData) => {
-  formData.append("userId", userId);
-  formData.append("file", fileInput.files[0]);
-
-  try {
-    const response = await api.post("/users/upload-profile-picture", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error uploading profile picture:", error);
-    throw error;
-  }
-};
-
 export const fetchUserProfile = async () => {
   try {
     const response = await api.get("/users/profile");
@@ -80,6 +65,27 @@ export const fetchUserProfile = async () => {
     return response.data;
   } catch (error) {
     console.error("(NOBRIDGE) ERROR Error fetching user profile:", error);
+    throw error;
+  }
+};
+
+export const uploadProfilePicture = async (formData) => {
+  try {
+    console.log("(NOBRIDGE) LOG Starting upload with formData:", formData);
+    const response = await api.put("/users/update-profile-picture", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log("(NOBRIDGE) LOG Upload Response:", response.data);
+    return response.data; // { profilePicture: "cloudinary_url" }
+  } catch (error) {
+    console.error("(NOBRIDGE) ERROR Upload Error:", {
+      message: error.message,
+      code: error.code,
+      config: error.config,
+      response: error.response ? error.response.data : null,
+    });
     throw error;
   }
 };

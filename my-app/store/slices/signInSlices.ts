@@ -59,6 +59,10 @@ const signInSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = true;
     },
+    updateProfilePicture: (state, action) => {
+      state.user.profilePicture = action.payload; // Update profile picture in state
+      state.user.lastUpdatedAt = new Date().toISOString(); // Update timestamp
+    },
     clearSignInState: (state) => {
       state.email = "";
       state.password = "";
@@ -85,6 +89,7 @@ export const {
   setPassword,
   setSignInData,
   clearSignInState,
+  updateProfilePicture, // Export new action
   setJwtToken,
 } = signInSlice.actions;
 export default signInSlice.reducer;

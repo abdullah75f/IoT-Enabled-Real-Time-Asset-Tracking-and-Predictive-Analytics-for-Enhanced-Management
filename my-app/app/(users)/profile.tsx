@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,12 @@ import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import Footer from "@/components/footer";
 import { useDispatch, useSelector } from "react-redux";
-import { clearSignInState } from "@/store/slices/signInSlices";
-import { uploadProfilePicture } from "@/app/apiService/api";
+import {
+  clearSignInState,
+  setSignInData,
+  updateProfilePicture,
+} from "@/store/slices/signInSlices";
+import { fetchUserProfile, uploadProfilePicture } from "@/app/apiService/api";
 import { router } from "expo-router";
 export default function Profile() {
   const dispatch = useDispatch();
@@ -25,6 +29,9 @@ export default function Profile() {
   const [countryCode, setCountryCode] = useState("Code");
   const [expanded, setExpanded] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const isAuthenticated = useSelector(
+    (state: any) => state.signIn.isAuthenticated
+  );
 
   const toggleExpanded = useCallback(() => setExpanded(!expanded), [expanded]);
 
@@ -36,12 +43,29 @@ export default function Profile() {
     { label: "+91", value: "+91", key: "key_4" },
   ];
 
+  // Fetch profile data when component mounts or when navigating back
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (isAuthenticated && jwtToken) {
+        try {
+          const userData = await fetchUserProfile();
+          dispatch(setSignInData({ user: userData, jwtToken }));
+          setProfilePicture(userData.profilePicture); // Set local state too
+        } catch (error) {
+          console.error("(NOBRIDGE) LOG Fetch Profile Error:", error);
+          Alert.alert("Error", "Failed to load profile data.");
+        }
+      }
+    };
+    fetchProfile();
+  }, [isAuthenticated, jwtToken, dispatch]);
+
   const selectProfilePicture = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
+    if (!permissionResult.granted) {
+      Alert.alert("Error", "Permission to access camera roll is required!");
       return;
     }
 
@@ -63,7 +87,7 @@ export default function Profile() {
     try {
       const formData = new FormData();
       const fileExtension = uri.split(".").pop();
-      const fileName = `profile_picture.${fileExtension}`;
+      const fileName = `profile_picture_${signInData.userId}.${fileExtension}`;
       formData.append("file", {
         uri,
         name: fileName,
@@ -73,9 +97,13 @@ export default function Profile() {
       formData.append("userId", signInData.userId);
 
       const response = await uploadProfilePicture(formData);
-      Alert.alert("Success", "Profile picture uploaded successfully!");
+      const newProfilePictureUrl = response.profilePicture;
+      dispatch(updateProfilePicture(newProfilePictureUrl));
+      setProfilePicture(newProfilePictureUrl); // Update local state      Alert.alert("Success", "Profile picture uploaded successfully!");
     } catch (error) {
+      console.error("(NOBRIDGE) LOG Upload Error:", error);
       Alert.alert("Error", "Failed to upload profile picture.");
+      setProfilePicture(signInData.profilePicture); // Revert to previous on error
     }
   };
   // Single function to calculate dynamic width based on text length
@@ -154,7 +182,7 @@ export default function Profile() {
                   borderRadius: 4,
                   padding: 8,
                   marginVertical: 4,
-                  width: getTextWidth(signInData.email), // Using getTextWidth
+                  width: getTextWidth(signInData.email),
                 }}
               >
                 {signInData.email || "Enter your email"}
@@ -188,7 +216,7 @@ export default function Profile() {
                   borderRadius: 4,
                   padding: 8,
                   marginVertical: 4,
-                  width: getTextWidth(signInData.address), // Using getTextWidth
+                  width: getTextWidth(signInData.address),
                 }}
               >
                 {signInData.address || "Enter your Address"}

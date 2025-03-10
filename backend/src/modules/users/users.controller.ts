@@ -1,10 +1,25 @@
-import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Multer } from 'multer';
+import { diskStorage } from 'multer';
 import User from './user.entity';
 import { UsersService } from './users.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { GetUser } from 'src/auth/get-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
@@ -38,5 +53,37 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async getProfile(@GetUser() user: User) {
     return this.usersService.getProfile(user.userId);
+  }
+
+  @Put('update-profile-picture')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads', // Directory to store files temporarily
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}.${file.originalname.split('.').pop()}`,
+          );
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+      },
+    }),
+  )
+  async updateProfilePicture(
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const userId = req.user.userId; // From JWT
+    const profilePictureUrl = await this.usersService.updateProfilePicture(
+      userId,
+      file,
+    );
+    return { profilePicture: profilePictureUrl };
   }
 }
