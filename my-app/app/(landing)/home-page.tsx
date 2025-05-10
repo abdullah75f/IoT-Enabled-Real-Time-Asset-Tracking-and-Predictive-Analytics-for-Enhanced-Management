@@ -81,9 +81,7 @@ export default function HomePage() {
         <Text className="text-black self-center font-bold text-[24px]">
           Welcome, [User's Name]
         </Text>
-        <Text className="self-center text-base mt-2">
-          You have [X] assets tracked.
-        </Text>
+
         <Text className="self-center text-base mt-2">
           Lat: {location.latitude.toFixed(5)}, Lon:{" "}
           {location.longitude.toFixed(5)}
