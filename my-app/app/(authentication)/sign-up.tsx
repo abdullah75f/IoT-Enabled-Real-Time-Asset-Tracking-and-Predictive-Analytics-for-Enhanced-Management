@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, router } from "expo-router";
 import {
   View,
@@ -26,12 +26,13 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import { Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
-import { useEffect, useState } from "react";
 import { createUser, googleSignup } from "@/app/apiService/api";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { makeRedirectUri } from "expo-auth-session";
+import { useTheme } from "@react-navigation/native";
+import { CustomTheme } from "../../utils/theme";
 
 export default function SignUp() {
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,8 @@ export default function SignUp() {
     Inter_400Regular,
     Inter_700Bold,
   });
+
+  const { colors } = useTheme() as CustomTheme;
 
   WebBrowser.maybeCompleteAuthSession();
 
@@ -188,45 +191,62 @@ export default function SignUp() {
   if (!fontsLoaded || loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="black" />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View className="flex-1 justify-start pt-24">
-        <Text className="text-black self-center font-bold text-[34px]">
+      <View
+        className="flex-1 justify-start pt-24"
+        style={{ backgroundColor: colors.background }}
+      >
+        <Text
+          className="text-black self-center font-bold text-[34px]"
+          style={{ color: colors.text }}
+        >
           Sign Up
         </Text>
-        <View className="mx-6 pt-10 px-6 font-bold text-base">
-          <Text>First Name</Text>
+        <View
+          className="mx-6 pt-10 px-6 font-bold text-base"
+          style={{ backgroundColor: colors.card }}
+        >
+          <Text style={{ color: colors.text }}>First Name</Text>
           <TextInput
             value={signUpData.firstName}
             onChangeText={(text) => dispatch(setFirstName(text))}
             placeholder="Enter your full name"
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+            style={{ color: colors.text, borderColor: colors.border }}
           />
-          <Text>Last Name</Text>
+          <Text style={{ color: colors.text }}>Last Name</Text>
           <TextInput
             value={signUpData.lastName}
             onChangeText={(text) => dispatch(setLastName(text))}
             placeholder="Enter your full name"
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+            style={{ color: colors.text, borderColor: colors.border }}
           />
           <View className="mx-6 pt-4 px-6">
-            <Text className="font-bold text-base text-[18px]">
+            <Text
+              className="font-bold text-base text-[18px]"
+              style={{ color: colors.text }}
+            >
               Sign Up Using
             </Text>
             <View className="flex-row justify-around items-center mt-4">
               <View className="flex-row items-center">
-                <Text className="mr-2">Email</Text>
+                <Text className="mr-2" style={{ color: colors.text }}>
+                  Email
+                </Text>
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border ${
                     signUpData.selectedOption === "email"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
+                  style={{ borderColor: colors.border }}
                   onPress={() => dispatch(setSelectedOption("email"))}
                 >
                   {signUpData.selectedOption === "email" && (
@@ -235,13 +255,17 @@ export default function SignUp() {
                 </TouchableOpacity>
               </View>
               <View className="flex-row items-center">
-                <Text className="mr-2">Phone number</Text>
+                <Text className="mr-2" style={{ color: colors.text }}>
+                  Phone number
+                </Text>
+
                 <TouchableOpacity
                   className={`w-6 h-6 rounded-full border ${
                     signUpData.selectedOption === "phone"
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
+                  style={{ borderColor: colors.border }}
                   onPress={() => dispatch(setSelectedOption("phone"))}
                 >
                   {signUpData.selectedOption === "phone" && (
@@ -251,33 +275,34 @@ export default function SignUp() {
               </View>
             </View>
           </View>
-
           {signUpData.selectedOption === "email" && (
             <View>
-              <Text className="pt-2">Email</Text>
+              <Text style={{ color: colors.text }}>Email</Text>
               <TextInput
                 value={signUpData.email}
                 onChangeText={(text) => dispatch(setEmail(text))}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+                style={{ color: colors.text, borderColor: colors.border }}
               />
             </View>
           )}
           {signUpData.selectedOption === "phone" && (
             <View>
-              <Text className="pt-2">Phone Number</Text>
+              <Text style={{ color: colors.text }}>Phone Number</Text>
               <TextInput
                 value={signUpData.phoneNumber}
                 onChangeText={(text) => dispatch(setPhoneNumber(text))}
                 placeholder="Enter your Phone number"
                 keyboardType="phone-pad"
                 className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+                style={{ color: colors.text, borderColor: colors.border }}
               />
             </View>
           )}
           <View className="pt-4">
-            <Text>Gender</Text>
+            <Text style={{ color: colors.text }}>Gender</Text>
             <View className="flex-row justify-around mt-2">
               <View className="flex-row items-center">
                 <TouchableOpacity
@@ -286,13 +311,14 @@ export default function SignUp() {
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
+                  style={{ borderColor: colors.border }}
                   onPress={() => dispatch(setGender("Male"))}
                 >
                   {signUpData.gender === "Male" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
-                <Text>Male</Text>
+                <Text style={{ color: colors.text }}>Male</Text>
               </View>
               <View className="flex-row items-center">
                 <TouchableOpacity
@@ -301,55 +327,60 @@ export default function SignUp() {
                       ? "bg-gray-300"
                       : "bg-transparent"
                   } flex justify-center items-center`}
+                  style={{ borderColor: colors.border }}
                   onPress={() => dispatch(setGender("Female"))}
                 >
                   {signUpData.gender === "Female" && (
                     <View className="w-3 h-3 rounded-full bg-black"></View>
                   )}
                 </TouchableOpacity>
-                <Text>Female</Text>
+                <Text style={{ color: colors.text }}>Female</Text>
               </View>
             </View>
           </View>
-
           <View className="w-40 pt-5 ">
-            <Text className="pb-2">Age</Text>
+            <Text style={{ color: colors.text }}>Age</Text>
             <TextInput
               value={signUpData.age}
               onChangeText={(text) => dispatch(setAge(text))}
               placeholder="Enter your age"
               className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+              style={{ color: colors.text, borderColor: colors.border }}
             />
           </View>
         </View>
-
-        <View className="mx-6 pt-5 px-6 font-bold text-base">
-          <Text className="pb-2">Address</Text>
+        <View
+          className="mx-6 pt-5 px-6 font-bold text-base"
+          style={{ backgroundColor: colors.card }}
+        >
+          <Text style={{ color: colors.text }}>Address</Text>
           <TextInput
             value={signUpData.address}
             onChangeText={(text) => dispatch(setAddress(text))}
             placeholder="Enter your address,e.g, Ethiopia, Addis Ababa"
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+            style={{ color: colors.text, borderColor: colors.border }}
           />
-
-          <Text className="pb-2">Password</Text>
+          <Text style={{ color: colors.text }}>Password</Text>
           <TextInput
             value={signUpData.password}
             onChangeText={handlePasswordChange}
             placeholder="Enter your password"
             secureTextEntry
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+            style={{ color: colors.text, borderColor: colors.border }}
           />
-          <Text className="pb-2 pt-5">Confirm Password</Text>
+          <Text style={{ color: colors.text }}>Confirm Password</Text>
           <TextInput
             value={signUpData.confirmPassword}
             onChangeText={handleConfirmPasswordChange}
             placeholder="Enter your password"
             secureTextEntry
             className="rounded border border-gray-300 border-solid p-2 my-2 min-h-[10px]"
+            style={{ color: colors.text, borderColor: colors.border }}
           />
           {signUpData.passwordMismatchError && (
-            <Text style={{ color: "red", fontSize: 12 }}>
+            <Text style={{ color: colors.notification, fontSize: 12 }}>
               Passwords do not match
             </Text>
           )}
@@ -359,35 +390,57 @@ export default function SignUp() {
             className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
             onPress={handleSignUp}
             disabled={signUpData.passwordMismatchError}
+            style={{ backgroundColor: colors.primary }}
           >
-            <Text className="self-center text-white text-center">Sign Up</Text>
+            <Text
+              className="self-center text-white text-center"
+              style={{ color: colors.text }}
+            >
+              Sign Up
+            </Text>
           </TouchableOpacity>
         </View>
         <View className="flex-row justify-center items-center mt-6">
-          <Text>Have an account?</Text>
+          <Text style={{ color: colors.text }}>Have an account?</Text>
           <Link href="/(authentication)/sign-in" asChild>
             <TouchableOpacity>
-              <Text className="font-bold"> Sign In</Text>
+              <Text className="font-bold" style={{ color: colors.text }}>
+                Sign In
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>
         <View className="flex-row items-center self-center my-6 w-[335px] h-5">
-          <View className="flex-1 h-px bg-gray-300" />
-          <Text className="mx-2.5 text-black">Or Sign up with</Text>
-          <View className="flex-1 h-px bg-gray-300" />
+          <View
+            className="flex-1 h-px bg-gray-300"
+            style={{ backgroundColor: colors.border }}
+          />
+          <Text className="mx-2.5 text-black" style={{ color: colors.text }}>
+            Or Sign up with
+          </Text>
+          <View
+            className="flex-1 h-px bg-gray-300"
+            style={{ backgroundColor: colors.border }}
+          />
         </View>
         <View className="flex-1  mb-16 ">
           <View className=" flex-row justify-around">
             <TouchableOpacity
               className="border rounded-[16px] w-[260px] h-16 justify-center items-center"
               onPress={handleGoogleSignIn} // Trigger Google Sign-In here
+              style={{ borderColor: colors.border }}
             >
               <View className="flex-row items-center gap-2">
                 <Image
                   source={require("../../assets/images/google-logo.png")}
                   style={{ width: 20, height: 20 }}
                 />
-                <Text className="text-lg text-black">Google</Text>
+                <Text
+                  className="text-lg text-black"
+                  style={{ color: colors.text }}
+                >
+                  Google
+                </Text>
               </View>
             </TouchableOpacity>
           </View>

@@ -1,4 +1,9 @@
 import {
+  LightTheme,
+  DarkTheme as CustomDarkTheme,
+  CustomTheme,
+} from "../utils/theme";
+import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
@@ -39,7 +44,11 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider
+        value={
+          colorScheme === "dark" ? CustomDarkTheme : (LightTheme as CustomTheme)
+        }
+      >
         <Stack>
           <Stack.Screen
             name="(authentication)"

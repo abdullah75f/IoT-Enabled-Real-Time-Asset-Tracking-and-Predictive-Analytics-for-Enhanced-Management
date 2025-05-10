@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,6 +20,8 @@ import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -80,34 +83,134 @@ export class UsersService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const verificationLink = `http://192.168.1.4:3000/users/verify-email?token=${token}`;
+    const verificationLink = `http://192.168.1.6:3000/users/verify-email?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
       text: `Click the link to verify your email: ${verificationLink}`,
-      html: `<p>Click <a href="${verificationLink}">here</a> to verify your email.</p>`,
+      html: `<p>Thank you for signing up!</p><p>Click <a href="${verificationLink}">here</a> to verify your email address.</p><p>If you did not sign up for this account, you can safely ignore this email.</p>`,
     });
+    this.logger.log(`Verification email successfully sent to ${email}`);
   }
 
   async verifyEmail(token: string, res: any) {
+    // Using 'any' for res, or import Response from 'express'
+    this.logger.log(`Attempting to verify email with token: ${token}`);
     const userData = this.verificationTokens.get(token);
+    const appScheme = process.env.EXPO_APP_SCHEME || 'myapp';
 
+    // --- Helper Function to create basic HTML page ---
+    const createHtmlResponse = (
+      title: string,
+      message: string,
+      includeOpenAppLink = false,
+    ) => {
+      let buttonHtml = '';
+      // Only include the button if requested (i.e., on successful verification)
+      if (includeOpenAppLink) {
+        buttonHtml = `
+          <div style="margin-top: 25px;">
+            <a href="${appScheme}://" style="display: inline-block; padding: 12px 25px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 1em; font-weight: bold;">
+              Open Mobile App
+            </a>
+            <p style="font-size: 0.9em; color: #777; margin-top: 10px;">(If the button doesn't work, please open the app manually.)</p>
+          </div>
+        `;
+      }
+
+      return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${title}</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 90vh; background-color: #f0f2f5; margin: 0; padding: 15px; }
+                .container { background-color: #fff; padding: 35px 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 100%; }
+                h1 { color: #1c1e21; margin-bottom: 20px; font-size: 1.8em; }
+                p { color: #4b4f56; font-size: 1.1em; line-height: 1.6; margin-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>${title}</h1>
+                <p>${message}</p>
+                ${buttonHtml} {/* Inject the button HTML here */}
+            </div>
+        </body>
+        </html>
+      `;
+    };
+    // --- End Helper Function ---
+
+    // 1. Handle Case: Invalid or Expired Token
     if (!userData) {
-      return res.redirect('http://192.168.1.4:5173/sign-in?verified=true');
+      this.logger.warn(
+        `Invalid or expired verification token received: ${token}`,
+      );
+      this.verificationTokens.delete(token);
+      const html = createHtmlResponse(
+        'Verification Failed',
+        'This verification link is invalid or has expired. Please try signing up again in the mobile app.',
+      );
+      return res.status(400).send(html);
     }
 
-    // Save user to database
-    const user = this.userRepository.create({
-      ...userData,
-      isEmailVerified: true,
-      emailVerificationToken: null,
-    });
+    this.logger.log(
+      `Found user data for token: ${token}, email: ${userData.email}`,
+    );
 
-    await this.userRepository.save(user);
-    this.verificationTokens.delete(token); // Remove from temporary storage
+    // 2. Handle Case: Valid Token - Try to save the user
+    try {
+      const existingVerifiedUser = await this.userRepository.findOne({
+        where: { email: userData.email, isEmailVerified: true },
+      });
 
-    // Redirect to frontend sign-in page
-    return res.redirect('http:/192.168.1.4:5173/sign-in?verified=true');
+      if (existingVerifiedUser) {
+        this.logger.log(`Email ${userData.email} is already verified.`);
+        this.verificationTokens.delete(token);
+        // Pass true to include the button even if already verified, as they might want to open the app
+        const html = createHtmlResponse(
+          'Already Verified',
+          'Your email address has already been verified. You can sign in now.',
+          true, // Include "Open App" button
+        );
+        return res.status(200).send(html);
+      }
+
+      const user = this.userRepository.create({
+        ...userData,
+        isEmailVerified: true,
+        emailVerificationToken: null,
+      });
+
+      await this.userRepository.save(user);
+      this.logger.log(
+        `Successfully verified and saved user: ${userData.email}`,
+      );
+      this.verificationTokens.delete(token);
+
+      // Send Success HTML Response with the "Open Mobile App" button
+      const html = createHtmlResponse(
+        'Verification Successful!',
+        'Your email is verified. Click the button below to open the app and sign in.',
+        true, // Include "Open App" button
+      );
+      return res.status(200).send(html);
+    } catch (error) {
+      // 3. Handle Case: Error during database save
+      this.logger.error(
+        `Error saving user during verification for token ${token}:`,
+        error.stack,
+      );
+      this.verificationTokens.delete(token);
+      const html = createHtmlResponse(
+        'Verification Error',
+        'An unexpected error occurred while verifying your email. Please try signing up again in the mobile app or contact support.',
+      );
+      return res.status(500).send(html);
+    }
   }
 
   async googleSignup(token: string) {
