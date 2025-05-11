@@ -1,10 +1,74 @@
 import Footer from "@/components/footer";
 import { router } from "expo-router";
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import MapComponent from "@/components/MapComponent"; // Import the map component
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import MapComponent from "@/components/MapComponent";
+import { fetchLocation } from "../apiService/api";
 
 export default function TrackingPage() {
+  const [location, setLocation] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchAndUpdateLocation = async () => {
+      try {
+        const data = await fetchLocation();
+        console.log(
+          "(NOBRIDGE) LOG Backend location response (TrackingPage):",
+          data
+        );
+        if (isMounted) {
+          setLocation((prevLocation) => {
+            if (
+              prevLocation.latitude !== data.latitude ||
+              prevLocation.longitude !== data.longitude
+            ) {
+              console.log(
+                "(NOBRIDGE) LOG Location changed (TrackingPage), updating:",
+                data
+              );
+              return {
+                latitude: data.latitude,
+                longitude: data.longitude,
+              };
+            }
+            console.log(
+              "(NOBRIDGE) LOG Same location (TrackingPage), skipping update:",
+              data
+            );
+            return prevLocation;
+          });
+        }
+      } catch (error: any) {
+        if (isMounted) {
+          console.log(
+            "Error fetching updated location (TrackingPage):",
+            error.message,
+            error.response?.data
+          );
+          Alert.alert(
+            "Error",
+            error.message || "Failed to fetch updated location."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setTimeout(fetchAndUpdateLocation, 5000);
+        }
+      }
+    };
+
+    fetchAndUpdateLocation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <View className="flex-1 justify-start pt-10">
       <View className="flex-1">
@@ -12,8 +76,11 @@ export default function TrackingPage() {
           Asset Tracking
         </Text>
 
-        {/* Map Component */}
-        <MapComponent latitude={37.78825} longitude={-122.4324} />
+        <MapComponent
+          key={`${location.latitude}-${location.longitude}`}
+          latitude={location.latitude}
+          longitude={location.longitude}
+        />
 
         <TouchableOpacity
           onPress={() => router.push("/(properties)/asset-history")}

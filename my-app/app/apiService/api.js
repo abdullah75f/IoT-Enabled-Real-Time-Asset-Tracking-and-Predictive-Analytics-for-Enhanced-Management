@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.4:3000",
+  baseURL: "http:/192.168.1.6:3000",
 });
 
 api.interceptors.request.use(
@@ -17,6 +17,20 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+export const fetchLocation = async () => {
+  try {
+    const response = await api.get("/assets/location");
+    return response.data;
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Fetch location failed:",
+      error.message,
+      error.response?.data
+    );
+    throw error; // Propagate error to the caller
+  }
+};
 
 export const createUser = async (userData) => {
   try {
@@ -52,7 +66,10 @@ export const signInUser = async (credentials) => {
       error.code,
       error.config
     );
-    throw (
+    if (error.response?.data?.message === "Invalid password") {
+      throw new Error("Incorrect password. Please try again.");
+    }
+    throw new Error(
       error.response?.data?.message || "An error occurred while signing in."
     );
   }
