@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  Linking,
 } from "react-native";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -19,13 +20,18 @@ import {
   updateProfilePicture,
 } from "@/store/slices/signInSlices";
 import { fetchUserProfile, uploadProfilePicture } from "@/app/apiService/api";
+import * as Location from "expo-location";
 import { router } from "expo-router";
+
 export default function Profile() {
   const dispatch = useDispatch();
   const signInData = useSelector((state: any) => state.signIn.user);
   const jwtToken = useSelector((state: any) => state.signIn.jwtToken);
 
   const [currentPosition, setCurrentPosition] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [googleMapsLink, setGoogleMapsLink] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState("Code");
   const [expanded, setExpanded] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -50,7 +56,7 @@ export default function Profile() {
         try {
           const userData = await fetchUserProfile();
           dispatch(setSignInData({ user: userData, jwtToken }));
-          setProfilePicture(userData.profilePicture); // Set local state too
+          setProfilePicture(userData.profilePicture);
         } catch (error) {
           console.error("(NOBRIDGE) LOG Fetch Profile Error:", error);
           Alert.alert("Error", "Failed to load profile data.");
@@ -59,6 +65,62 @@ export default function Profile() {
     };
     fetchProfile();
   }, [isAuthenticated, jwtToken, dispatch]);
+
+  // Fetch device's current location
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is required to fetch your current position."
+          );
+          setCurrentPosition("Permission denied");
+          return;
+        }
+
+        // Fetch the current location
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        const { latitude: lat, longitude: lon } = location.coords;
+        // Store latitude and longitude separately
+        setLatitude(lat);
+        setLongitude(lon);
+        // Format the location as "Latitude, Longitude"
+        setCurrentPosition(`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+        // Generate Google Maps URL
+        setGoogleMapsLink(`https://www.google.com/maps?q=${lat},${lon}`);
+      } catch (error) {
+        console.error("(NOBRIDGE) LOG Location Error:", error);
+        Alert.alert("Error", "Failed to fetch current location.");
+        setCurrentPosition("Unable to fetch location");
+        setGoogleMapsLink(null);
+      }
+    };
+
+    getLocation();
+  }, []);
+
+  // Function to open the Google Maps link
+  const openGoogleMaps = async () => {
+    if (googleMapsLink) {
+      try {
+        const supported = await Linking.canOpenURL(googleMapsLink);
+        if (supported) {
+          await Linking.openURL(googleMapsLink);
+        } else {
+          Alert.alert("Error", "Unable to open Google Maps.");
+        }
+      } catch (error) {
+        console.error("(NOBRIDGE) LOG Open URL Error:", error);
+        Alert.alert("Error", "Failed to open Google Maps.");
+      }
+    }
+  };
 
   const selectProfilePicture = async () => {
     const permissionResult =
@@ -227,10 +289,18 @@ export default function Profile() {
               <Text className="font-semibold">Current position</Text>
               <TextInput
                 value={currentPosition}
-                onChangeText={setCurrentPosition}
-                placeholder="Enter your current position"
+                editable={false}
+                placeholder="Fetching location..."
                 className="rounded border border-gray-300  border-solid p-2 my-2 min-h-[10px] w-1/2"
               />
+              {googleMapsLink && (
+                <TouchableOpacity onPress={openGoogleMaps}>
+                  <Text className="underline mt-1 font-semibold">
+                    {" "}
+                    View on Google Maps
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <View className="mb-10">

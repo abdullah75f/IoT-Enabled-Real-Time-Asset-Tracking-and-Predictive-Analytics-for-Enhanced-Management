@@ -390,14 +390,8 @@ export default function SignUp() {
             className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg"
             onPress={handleSignUp}
             disabled={signUpData.passwordMismatchError}
-            style={{ backgroundColor: colors.primary }}
           >
-            <Text
-              className="self-center text-white text-center"
-              style={{ color: colors.text }}
-            >
-              Sign Up
-            </Text>
+            <Text className="self-center text-white text-center">Sign Up</Text>
           </TouchableOpacity>
         </View>
         <View className="flex-row justify-center items-center mt-6">

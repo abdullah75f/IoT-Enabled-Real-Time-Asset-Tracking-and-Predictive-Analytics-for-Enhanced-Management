@@ -4,14 +4,17 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import MapComponent from "@/components/MapComponent";
 import { fetchLocation } from "../apiService/api";
+import { useSelector } from "react-redux";
 
 export default function HomePage() {
   const [location, setLocation] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
   });
-  const renderCount = useRef(0); // Track render count for debugging
+  const renderCount = useRef(0);
 
+  const user = useSelector((state: any) => state.signIn.user);
+  const userName = user?.firstName || "User";
   useEffect(() => {
     let isMounted = true;
 
@@ -21,7 +24,6 @@ export default function HomePage() {
         console.log("(NOBRIDGE) LOG Backend location response:", data);
         if (isMounted) {
           setLocation((prevLocation) => {
-            // Only update state if latitude or longitude changes
             if (
               prevLocation.latitude !== data.latitude ||
               prevLocation.longitude !== data.longitude
@@ -62,7 +64,6 @@ export default function HomePage() {
     };
   }, []);
 
-  // Increment render count and log on every render triggered by location change
   renderCount.current += 1;
   useEffect(() => {
     console.log(
@@ -79,11 +80,11 @@ export default function HomePage() {
     <View className="flex-1 justify-start pt-24">
       <View className="flex-1">
         <Text className="text-black self-center font-bold text-[24px]">
-          Welcome, [User's Name]
+          Welcome, {userName}
         </Text>
 
         <Text className="self-center text-base mt-2">
-          Lat: {location.latitude.toFixed(5)}, Lon:{" "}
+          Lat: {location.latitude.toFixed(5)}, Lon:
           {location.longitude.toFixed(5)}
         </Text>
 
@@ -107,10 +108,10 @@ export default function HomePage() {
             <Text className="text-white text-lg">Assets Details</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push("/(properties)/add-asset")}
+            onPress={() => router.push("/(properties)/geofence")}
             className="bg-[#21252C] w-full h-12 justify-center items-center rounded-md"
           >
-            <Text className="text-white text-lg">Add New Assets</Text>
+            <Text className="text-white text-lg">Geo-Fencing</Text>
           </TouchableOpacity>
         </View>
         <Footer />

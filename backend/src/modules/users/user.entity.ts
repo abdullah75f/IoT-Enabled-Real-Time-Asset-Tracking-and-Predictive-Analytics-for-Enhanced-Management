@@ -1,6 +1,13 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { GenderEnum } from '../enum/gender-enum';
 import { Matches } from 'class-validator';
+import { GeofenceAlert } from '../asset/geofence-alert.entity';
 
 @Entity('user')
 export default class User {
@@ -51,6 +58,19 @@ export default class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   lastUpdatedAt: Date;
+
+  @Column({ nullable: true })
+  passwordResetToken?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetTokenExpires?: Date;
+
+  @OneToMany(() => GeofenceAlert, (alert) => alert.user)
+  geofenceAlerts: GeofenceAlert[];
 }

@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http:/192.168.1.6:3000",
+  baseURL: "http://192.168.1.7:3000",
 });
 
 api.interceptors.request.use(
@@ -28,7 +28,7 @@ export const fetchLocation = async () => {
       error.message,
       error.response?.data
     );
-    throw error; // Propagate error to the caller
+    throw error;
   }
 };
 
@@ -104,6 +104,89 @@ export const uploadProfilePicture = async (formData) => {
       response: error.response ? error.response.data : null,
     });
     throw error;
+  }
+};
+
+// Create geofence alert
+export const createGeofenceAlert = async (alertData) => {
+  try {
+    const response = await api.post("/geofence/alert", alertData);
+    console.log("(NOBRIDGE) LOG Geofence alert response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Failed to send geofence alert:",
+      error.message,
+      error.response?.data
+    );
+    throw error;
+  }
+};
+
+export const updateUserProfile = async (userData) => {
+  try {
+    const response = await api.put("/users/update-profile", userData);
+    console.log("(NOBRIDGE) LOG Update Profile Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Failed to update user profile:",
+      error.message,
+      error.response?.data
+    );
+    throw error;
+  }
+};
+
+/**
+ * Sends a request to initiate the password reset process.
+ * @param {string} email - The user's email address.
+ * @returns {Promise<object>} - Promise resolving to the response data (e.g., { message: "..." })
+ */
+export const requestPasswordReset = async (email) => {
+  try {
+    console.log("(NOBRIDGE) LOG Requesting password reset for:", email);
+    const response = await api.post("/users/forgot-password", { email });
+    console.log("(NOBRIDGE) LOG Forgot Password Response:", response.data);
+    return response.data; // Should contain a message like { message: "..." }
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Failed to request password reset:",
+      error.message,
+      error.response?.data
+    );
+    // Rethrow a more specific error or the backend's message
+    throw new Error(
+      error.response?.data?.message || "Could not request password reset."
+    );
+  }
+};
+
+/**
+ * Sends the reset token and new password to the backend.
+ * @param {string} token - The password reset token received via email.
+ * @param {string} newPassword - The user's desired new password.
+ * @returns {Promise<object>} - Promise resolving to the response data (e.g., { message: "..." })
+ */
+export const resetPassword = async (token, newPassword) => {
+  try {
+    console.log("(NOBRIDGE) LOG Attempting to reset password with token."); // Don't log token itself
+    const response = await api.post("/users/reset-password", {
+      token,
+      newPassword,
+    });
+    console.log("(NOBRIDGE) LOG Reset Password Response:", response.data);
+    return response.data; // Should contain a message like { message: "..." }
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Failed to reset password:",
+      error.message,
+      error.response?.data
+    );
+    // Rethrow a more specific error or the backend's message
+    throw new Error(
+      error.response?.data?.message || "Could not reset password."
+    );
   }
 };
 
