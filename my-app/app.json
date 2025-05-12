@@ -12,10 +12,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.abdullah75f.iotassettracking",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location for geofencing.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location for geofencing.",
+        "UIBackgroundModes": ["location"]
       }
     },
     "android": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION"],
       "package": "com.abdullah75f.iotassettracking",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -30,6 +34,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow this app to use your location for geofencing.",
+          "locationBackgroundPermission": "Allow this app to use your location in the background for geofencing."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -39,7 +50,8 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

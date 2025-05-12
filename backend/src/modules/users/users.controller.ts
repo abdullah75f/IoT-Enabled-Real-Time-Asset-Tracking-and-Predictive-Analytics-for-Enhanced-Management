@@ -6,10 +6,13 @@ import {
   Put,
   Query,
   Req,
+  Request,
   Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Multer } from 'multer';
@@ -20,6 +23,8 @@ import { SignInDto } from './dto/sign-in.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -60,7 +65,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads', // Directory to store files temporarily
+        destination: './uploads',
         filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -71,7 +76,7 @@ export class UsersController {
         },
       }),
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
+        fileSize: 5 * 1024 * 1024,
       },
     }),
   )
@@ -79,11 +84,46 @@ export class UsersController {
     @Req() req: any,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const userId = req.user.userId; // From JWT
+    const userId = req.user.userId;
     const profilePictureUrl = await this.usersService.updateProfilePicture(
       userId,
       file,
     );
     return { profilePicture: profilePictureUrl };
+  }
+
+  @Put('update-profile')
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @Request() req,
+    @Body()
+    updateData: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phoneNumber: string;
+      gender: string;
+      age: string;
+      address: string;
+    },
+  ) {
+    const userId = req.user['userId'];
+    return this.usersService.updateProfile(userId, updateData);
+  }
+
+  @Post('forgot-password')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.usersService.requestPasswordReset(forgotPasswordDto.email);
+  }
+
+  @Post('reset-password')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.usersService.resetPassword(resetPasswordDto);
   }
 }

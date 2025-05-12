@@ -1,21 +1,81 @@
+import React, { useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
+  Keyboard,
 } from "react-native";
 import { useFonts, Inter_600SemiBold } from "@expo-google-fonts/inter";
-import { Link } from "expo-router";
+import { Link, useRouter, useFocusEffect } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setEmail } from "@/store/slices/forgotPasswordSlice";
+import {
+  setEmail,
+  clearForgotPasswordState,
+} from "@/store/slices/forgotPasswordSlice";
+import { requestPasswordReset } from "../apiService/api";
+
+interface ApiResponse {
+  message: string;
+}
 
 export default function ForgotPassword() {
   const dispatch = useDispatch();
   const forgotPasswordData = useSelector((state: any) => state.forgotPassword);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [fontsLoaded] = useFonts({
     Inter_600SemiBold,
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(clearForgotPasswordState());
+    }, [dispatch])
+  );
+
+  const handleSendResetInstructions = async () => {
+    Keyboard.dismiss();
+    const email = forgotPasswordData.email?.trim();
+
+    if (!email) {
+      Alert.alert("Error", "Please enter your email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result: { message?: string } = await requestPasswordReset(email);
+
+      Alert.alert(
+        "Check Your Email",
+        result.message ||
+          "If an account exists, password reset instructions have been sent.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.push({
+                pathname: "/(authentication)/reset-password",
+                params: { email: email },
+              });
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error: any) {
+      console.error("Forgot Password Error:", error);
+      Alert.alert(
+        "Request Failed",
+        error.message || "Could not request password reset. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!fontsLoaded) {
     return (
@@ -26,42 +86,51 @@ export default function ForgotPassword() {
   }
 
   return (
-    <View className="flex-1 justify-start pt-32">
-      <View className="justify-center items-center w-[276px] h-[82px] self-center">
+    <View className="flex-1 justify-start pt-32 bg-white px-5">
+      <View className="justify-center items-center w-full mb-10">
         <Text
-          style={{
-            fontSize: 24,
-            fontFamily: "Inter_600SemiBold",
-          }}
+          className="text-2xl font-bold text-center text-gray-800"
+          style={{ fontFamily: "Inter_600SemiBold" }}
         >
           Forgot Password?
         </Text>
-        <Text className="text-base leading-7 text-center mb-5 pt-2 font-thin">
-          Enter your email address, and we will
-          <Text className="text-base leading-6 text-center">
-            {"\n"}send an OTP
-          </Text>
+        <Text className="text-base leading-6 text-center text-gray-600 mt-2 px-4">
+          Enter your email address, and we will send reset instructions
         </Text>
       </View>
-      <View className="mx-7 pt-[60px] px-5 text-base font-bold">
-        <Text>Email</Text>
+
+      <View className="w-full">
+        <Text className="text-gray-800 font-medium mb-1 text-sm">Email</Text>
         <TextInput
           placeholder="Enter email address"
-          value={forgotPasswordData.email}
+          value={forgotPasswordData.email} //
           onChangeText={(text) => dispatch(setEmail(text))}
           keyboardType="email-address"
-          className="rounded border border-gray-300 border-solid p-3 my-2 min-h-[10px]"
+          autoCapitalize="none"
+          className="rounded border border-gray-300 bg-gray-50 p-3 min-h-[50px] text-base w-full"
         />
-        <Link href="/sign-up" asChild>
-          <TouchableOpacity className="bg-[#21252C] mt-8 w-[335px] h-16 justify-center items-center self-center rounded-md">
-            <Text className="self-center text-white text-center">Continue</Text>
-          </TouchableOpacity>
-        </Link>
+
+        <TouchableOpacity
+          className={`bg-[#21252C] mt-8 w-full h-14 justify-center items-center self-center rounded-md ${
+            isLoading ? "opacity-70" : ""
+          }`}
+          onPress={handleSendResetInstructions}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="self-center text-white text-center font-semibold text-base">
+              Send Reset Instructions
+            </Text>
+          )}
+        </TouchableOpacity>
+
         <View className="flex-row justify-center items-center mt-7">
-          <Text>Remembered password?</Text>
+          <Text className="text-gray-600">Remembered password?</Text>
           <Link href="/(authentication)/sign-in" asChild>
             <TouchableOpacity>
-              <Text className="font-bold"> Sign in</Text>
+              <Text className="font-bold text-[#21252C]"> Sign in</Text>
             </TouchableOpacity>
           </Link>
         </View>

@@ -11,6 +11,10 @@ export default function PropertiesLayout() {
         name="notifications"
         options={{ headerShown: true, title: "Notifications" }}
       />
+       <Stack.Screen
+        name="geofence"
+        options={{ headerShown: true, title: "Geo Fencing" }}
+      />
     </Stack>
   );
 }

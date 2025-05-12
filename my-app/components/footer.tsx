@@ -35,12 +35,12 @@ export default function Footer() {
         </View>
         <View className="justify-center items-center">
           <TouchableOpacity
-            onPress={() => router.push("/(properties)/asset-details")}
+            onPress={() => router.push("/(users)/setting")}
             className="pr-4"
           >
             <MaterialIcons name="book" size={25} color="black" />
           </TouchableOpacity>
-          <Text>Asset</Text>
+          <Text>Setting</Text>
         </View>
         <View className="justify-center items-center">
           <TouchableOpacity

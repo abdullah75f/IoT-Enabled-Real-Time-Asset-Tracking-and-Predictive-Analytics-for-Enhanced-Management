@@ -150,12 +150,7 @@ export default function SignIn() {
           {loading ? (
             <ActivityIndicator size="small" color={colors.text} />
           ) : (
-            <Text
-              className="self-center text-white text-center"
-              style={{ color: colors.text }}
-            >
-              Sign In
-            </Text>
+            <Text className="self-center text-white text-center">Sign In</Text>
           )}
         </TouchableOpacity>
         {/* <TouchableOpacity  className="bg-[#21252C] mt-6 w-[335px] h-16 justify-center items-center self-center rounded-lg">

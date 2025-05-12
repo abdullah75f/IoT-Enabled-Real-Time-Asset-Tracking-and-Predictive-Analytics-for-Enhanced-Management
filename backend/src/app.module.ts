@@ -9,6 +9,7 @@ import User from './modules/users/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { AssetModule } from './modules/asset/asset.module';
+import { GeofenceModule } from './modules/asset/geofence.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AssetModule } from './modules/asset/asset.module';
     UsersModule,
     AuthModule,
     AssetModule,
+    GeofenceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
