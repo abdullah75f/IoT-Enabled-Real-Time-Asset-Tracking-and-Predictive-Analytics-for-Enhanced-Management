@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.7:3000",
+  baseURL: "http://192.168.1.6:3000",
 });
 
 api.interceptors.request.use(
@@ -187,6 +187,76 @@ export const resetPassword = async (token, newPassword) => {
     throw new Error(
       error.response?.data?.message || "Could not reset password."
     );
+  }
+};
+
+export const createCar = async (carName, carValue) => {
+  try {
+    const response = await api.post("/vehicle-readings/car-name", {
+      carName: carName,
+      carValue: carValue
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating car:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const fetchCarNamesFromDB = async () => {
+  try {
+    const response = await api.get("/vehicle-readings/cars");
+    return response.data; // Array of car names
+  } catch (error) {
+    console.error(
+      "Failed to fetch cars:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const fetchLatestReading = async () => {
+  try {
+    const response = await api.get("/vehicle-readings/latest");
+    return response.data;
+  } catch (error) {
+    console.error(
+      "(NOBRIDGE) ERROR Failed to fetch latest vehicle reading:",
+      error.message,
+      error.response?.data
+    );
+    throw error;
+  }
+};
+
+export const fetchBreachesByCarName = async (carName) => {
+  try {
+    const response = await api.get(`/geofence/breaches/${carName}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching breaches by car:", error);
+    throw error;
+  }
+};
+
+export const fetchBreachDetails = async (carName) => {
+  try {
+    const response = await api.get(`/geofence/breach-details/${carName}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching breach details:", error);
+    throw error;
+  }
+};
+
+export const fetchCarValues = async () => {
+  try {
+    const response = await api.get("/vehicle-readings/car-values");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching car values:", error.response?.data || error.message);
+    throw error;
   }
 };
 
