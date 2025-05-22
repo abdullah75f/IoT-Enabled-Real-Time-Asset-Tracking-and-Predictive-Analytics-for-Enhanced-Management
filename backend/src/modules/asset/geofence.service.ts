@@ -35,4 +35,33 @@ export class GeofenceService {
 
     return this.geofenceAlertRepository.save(alert);
   }
+
+  async getBreachesByCarName(carName: string, userId: string): Promise<number> {
+    const count = await this.geofenceAlertRepository.count({
+      where: {
+        user: { userId },
+        event: 'exited'  // Only count exit events as breaches
+      }
+    });
+    return count;
+  }
+
+  async getBreachDetails(carName: string, userId: string) {
+    const breaches = await this.geofenceAlertRepository.find({
+      where: {
+        user: { userId },
+        event: 'exited'
+      },
+      order: {
+        timestamp: 'DESC'
+      }
+    });
+
+    return breaches.map(breach => ({
+      event: breach.event,
+      latitude: Number(breach.latitude),
+      longitude: Number(breach.longitude),
+      timestamp: breach.timestamp
+    }));
+  }
 }

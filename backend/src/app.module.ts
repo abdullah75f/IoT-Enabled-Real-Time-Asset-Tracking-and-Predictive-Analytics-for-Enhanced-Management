@@ -10,6 +10,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { AssetModule } from './modules/asset/asset.module';
 import { GeofenceModule } from './modules/asset/geofence.module';
+import { VehicleReadingsModule } from './modules/vehicle-readings/vehicle-readings.module';
+import { GeofenceAlert } from './modules/asset/geofence-alert.entity';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { GeofenceModule } from './modules/asset/geofence.module';
         url: process.env.DATABASE_URL,
         autoLoadEntities: true,
         synchronize: true,
-        entities: [User],
+        entities: [User, GeofenceAlert],
         ssl: {
           rejectUnauthorized: false,
         },
@@ -36,6 +38,7 @@ import { GeofenceModule } from './modules/asset/geofence.module';
     AuthModule,
     AssetModule,
     GeofenceModule,
+    VehicleReadingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
