@@ -1,7 +1,7 @@
 import Footer from "@/components/footer";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, StyleSheet, SafeAreaView } from "react-native";
 import MapComponent from "@/components/MapComponent";
 import { fetchLocation } from "../apiService/api";
 
@@ -70,26 +70,52 @@ export default function TrackingPage() {
   }, []);
 
   return (
-    <View className="flex-1 justify-start pt-10">
-      <View className="flex-1">
-        <Text className="text-black self-center font-bold text-[24px]">
-          Asset Tracking
-        </Text>
-
+    <SafeAreaView style={styles.container}>
+      <View style={styles.mapContainer}>
         <MapComponent
           key={`${location.latitude}-${location.longitude}`}
           latitude={location.latitude}
           longitude={location.longitude}
         />
+      </View>
 
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
           onPress={() => router.push("/(properties)/asset-history")}
-          className="bg-green-700 w-[335px] h-12 justify-center items-center rounded-md mt-6 self-center"
+          style={styles.button}
         >
-          <Text className="text-white text-lg">Assets Details</Text>
+          <Text style={styles.buttonText}>Assets Details</Text>
         </TouchableOpacity>
       </View>
+
       <Footer />
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  mapContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  buttonContainer: {
+    padding: 20,
+    backgroundColor: '#F5F5F5',
+  },
+  button: {
+    backgroundColor: '#15803d', // green-700
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '500',
+  },
+});

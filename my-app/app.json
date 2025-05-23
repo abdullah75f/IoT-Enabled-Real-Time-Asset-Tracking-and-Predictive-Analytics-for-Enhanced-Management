@@ -15,11 +15,16 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location for geofencing.",
         "NSLocationWhenInUseUsageDescription": "This app uses your location for geofencing.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": ["location", "remote-notification"]
       }
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION"],
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ],
       "package": "com.abdullah75f.iotassettracking",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",

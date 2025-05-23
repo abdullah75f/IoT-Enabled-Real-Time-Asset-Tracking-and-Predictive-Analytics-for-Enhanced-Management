@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLocation, createGeofenceAlert } from "../apiService/api"; // Update import path
 import { setGeofencePoints, clearGeofence } from "@/store/slices/geofenceSlice";
 import store from "../../store/store";
+import { playAlertSound } from "../../utils/soundUtils";
+import AlertSoundPlayer from "../../components/AlertSoundPlayer";
+import { setupNotifications, sendGeofenceNotification } from "../../utils/notificationUtils";
 
 interface Point {
   latitude: number;
@@ -42,16 +45,23 @@ export default function Geofence() {
   );
   const renderCount = useRef(0);
 
+  useEffect(() => {
+    // Setup notifications when component mounts
+    setupNotifications();
+  }, []);
+
   const checkGeofenceStatus = (location: Point) => {
     if (points.length === 6 && databaseLocation) {
       const isInside = isPointInPolygon(location, points);
       if (isInsideGeofence === null) {
         setIsInsideGeofence(isInside);
         if (!isInside) {
-          Alert.alert(
+          // Show alert and play sound
+          sendGeofenceNotification(
             "Geofence Alert",
             "The current location is outside the geofenced area!"
           );
+          playAlertSound(); // Play sound for initial alert
           // Send alert to backend
           try {
             createGeofenceAlert({
@@ -66,10 +76,12 @@ export default function Geofence() {
         }
       } else if (isInsideGeofence !== isInside) {
         const event = isInside ? "entered" : "exited";
-        Alert.alert(
+        // Show alert and play sound
+        sendGeofenceNotification(
           "Geofence Alert",
           `The current location has ${event} the geofenced area!`
         );
+        playAlertSound(); // Play sound for state change alert
         setIsInsideGeofence(isInside);
         try {
           createGeofenceAlert({
@@ -82,7 +94,8 @@ export default function Geofence() {
           console.error("Failed to send geofence alert to backend:", error);
         }
       } else if (!isInside) {
-        Alert.alert(
+        // Show alert and play sound
+        sendGeofenceNotification(
           "Geofence Alert",
           "The current location is outside the geofenced area!"
         );
@@ -186,6 +199,7 @@ export default function Geofence() {
 
   return (
     <View style={styles.container}>
+      <AlertSoundPlayer shouldPlay={isInsideGeofence === false} />
       <Text style={styles.title}>Set Geofence</Text>
       <MapView style={styles.map} region={mapRegion} onPress={handleMapPress}>
         {databaseLocation && (

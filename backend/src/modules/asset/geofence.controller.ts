@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Param } from '@nestjs/common';
 import { GeofenceService } from './geofence.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
@@ -21,5 +21,20 @@ export class GeofenceController {
     const userId = req.user['userId'];
     console.log(`Received alert from userId: ${userId}`);
     return this.geofenceService.createAlert(alertData, userId);
+  }
+
+  @Get('breaches/:carName')
+  @UseGuards(JwtAuthGuard)
+  async getBreachesByCarName(@Param('carName') carName: string, @Request() req) {
+    const userId = req.user['userId'];
+    const count = await this.geofenceService.getBreachesByCarName(carName, userId);
+    return { boundaryBreach: count };
+  }
+
+  @Get('breach-details/:carName')
+  @UseGuards(JwtAuthGuard)
+  async getBreachDetails(@Param('carName') carName: string, @Request() req) {
+    const userId = req.user['userId'];
+    return this.geofenceService.getBreachDetails(carName, userId);
   }
 }

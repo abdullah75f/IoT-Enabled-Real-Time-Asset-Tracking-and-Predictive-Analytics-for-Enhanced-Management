@@ -10,6 +10,19 @@ export class AssetService {
     private assetReadingRepository: Repository<AssetReading>,
   ) {}
 
+  async createAssetReading(data: { latitude: number; longitude: number }): Promise<AssetReading> {
+    try {
+      const reading = this.assetReadingRepository.create({
+        latitude: data.latitude,
+        longitude: data.longitude,
+      });
+      return await this.assetReadingRepository.save(reading);
+    } catch (error) {
+      console.error('Error creating asset reading:', error);
+      throw error;
+    }
+  }
+
   async getLatestAssetReadingLocation(): Promise<{
     latitude: number;
     longitude: number;

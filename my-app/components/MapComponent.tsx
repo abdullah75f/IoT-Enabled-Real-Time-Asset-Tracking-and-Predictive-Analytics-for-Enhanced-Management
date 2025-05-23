@@ -2,7 +2,12 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-const MapComponent = ({ latitude, longitude }) => {
+interface MapComponentProps {
+  latitude: number;
+  longitude: number;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ latitude, longitude }) => {
   return (
     <View style={styles.container}>
       <MapView
@@ -23,10 +28,8 @@ const MapComponent = ({ latitude, longitude }) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 300,
-    width: "90%",
-    alignSelf: "center",
-    marginTop: 20,
+    flex: 1,
+    width: '100%',
   },
   map: {
     flex: 1,

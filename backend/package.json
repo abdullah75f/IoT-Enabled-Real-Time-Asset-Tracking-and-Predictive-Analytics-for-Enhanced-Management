@@ -39,13 +39,16 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "nodemailer": "^6.10.0",
+    "pandas": "^0.0.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
-    "pg": "^8.13.1",
+    "pg": "^8.16.0",
+    "python-bridge": "^1.1.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "sklearn": "^1.0.0",
+    "typeorm": "^0.3.24"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -55,7 +58,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.2",
     "@types/multer": "^1.4.12",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.17.47",
     "@types/nodemailer": "^6.4.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.0",
