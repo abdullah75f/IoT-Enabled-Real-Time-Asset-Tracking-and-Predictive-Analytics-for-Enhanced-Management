@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.6:3000",
+  baseURL: "http://10.5.90.211:3000",
 });
 
 api.interceptors.request.use(
@@ -12,11 +12,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log("(NOBRIDGE) LOG Request Config:", config);
     return config;
   },
   (error) => Promise.reject(error)
 );
+
+export { api };
 
 export const fetchLocation = async () => {
   try {
@@ -260,4 +261,27 @@ export const fetchCarValues = async () => {
   }
 };
 
-export default api;
+export const predictAnomaly = async (temp, speed) => {
+  try {
+    // Ensure we have valid numbers
+    const validTemp = Number(temp) || 0;
+    const validSpeed = Number(speed) || 0;
+
+    console.log('Sending prediction request with:', { temp: validTemp, speed: validSpeed });
+    
+    const response = await api.post("/vehicle-readings/predict-anomaly", {
+      temp: validTemp,
+      speed: validSpeed
+    });
+    console.log('Prediction response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error predicting anomaly:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    throw error;
+  }
+};
+

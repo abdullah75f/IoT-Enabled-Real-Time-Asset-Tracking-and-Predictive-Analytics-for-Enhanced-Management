@@ -9,7 +9,7 @@ export default function Footer() {
   
   return (
     <View className="w-full bg-white border-t border-gray-200" style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom : 0 }}>
-      <View className="flex-row justify-around items-center h-16 px-4">
+      <View className="flex-row justify-around items-center h-24 px-4">
         <TouchableOpacity
           onPress={() => router.push("/(landing)/home-page")}
           className="items-center"

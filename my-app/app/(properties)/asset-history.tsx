@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { Link, router } from "expo-router";
 
@@ -26,6 +27,7 @@ import {
   fetchLatestReading,
   fetchBreachesByCarName,
   fetchCarValues,
+  predictAnomaly
 } from "../apiService/api";
 
 export default function AssetHistory() {
@@ -36,13 +38,15 @@ export default function AssetHistory() {
   const [carValueInput, setCarValueInput] = useState(""); // For car value input
   const [addingCar, setAddingCar] = useState(false); // Loading state for adding car
   const [breachCounts, setBreachCounts] = useState<{[key: string]: number}>({});
+  const [anomalyData, setAnomalyData] = useState<{[key: string]: {anomaly: string, recommendation: string}}>({});
+  const [loadingAnomaly, setLoadingAnomaly] = useState<{[key: string]: boolean}>({});
 
   interface LatestReading {
-    [carName: string]: {
+    [carName: string]: Array<{
       speed?: number;
       engine_temperature?: number;
       reading_timestamp?: string;
-    };
+    }>;
   }
 
   const [latestReading, setLatestReading] = useState<LatestReading>({});
@@ -81,6 +85,11 @@ export default function AssetHistory() {
     const interval = setInterval(async () => {
       try {
         const data = await fetchLatestReading();
+        console.log('Latest Reading Data:', data); // Debug log
+        // Log data for each car
+        Object.keys(data).forEach(car => {
+          console.log(`Data for ${car}:`, data[car]);
+        });
         setLatestReading(data);
       } catch (error) {
         console.error("Failed to load latest reading:", error);
@@ -164,6 +173,72 @@ export default function AssetHistory() {
 
     loadCarNames();
   }, []);
+
+  const handleAnomalyPrediction = async (vehicleId: string) => {
+    try {
+      // Get the latest readings for this vehicle
+      const latestReadings = await fetchLatestReading();
+      const vehicleReadings = latestReadings[vehicleId];
+      
+      if (!vehicleReadings || !Array.isArray(vehicleReadings) || vehicleReadings.length === 0) {
+        throw new Error('No readings available for this vehicle');
+      }
+
+      // Get the most recent reading
+      const latestReading = vehicleReadings[0];
+      if (!latestReading.engine_temperature || !latestReading.speed) {
+        throw new Error('Missing temperature or speed readings');
+      }
+
+      router.push({
+        pathname: "/(landing)/AnomalyDetailsScreen",
+        params: {
+          carName: vehicleId,
+          temp: latestReading.engine_temperature,
+          speed: latestReading.speed
+        }
+      });
+    } catch (error: any) {
+      console.error('Error:', error);
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to predict anomaly. Please check your connection and try again.'
+      );
+    }
+  };
+
+  const styles = StyleSheet.create({
+    buttonContainer: {
+      marginTop: 10,
+      alignItems: 'center',
+    },
+    button: {
+      backgroundColor: '#007AFF',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    anomalyContainer: {
+      marginTop: 10,
+      padding: 10,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+    },
+    anomalyText: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 5,
+    },
+    recommendationText: {
+      fontSize: 14,
+      color: '#666',
+    },
+  });
 
   return (
     <View className="flex-1 bg-white">
@@ -260,7 +335,7 @@ export default function AssetHistory() {
                       </Text>
                       <View className="border bg-black w-[58.79] h-[17] rounded-[70.42] justify-center items-center">
                         <Text className="text-white text-[12.25px]">
-                          {latestReading[carName]?.speed ?? "N/A"}
+                          {latestReading[carName]?.[0]?.speed ?? "N/A"}
                         </Text>
                       </View>
                     </View>
@@ -293,7 +368,7 @@ export default function AssetHistory() {
                       </Text>
                       <View className="border bg-black w-[58.79] h-[17] rounded-[70.42] justify-center items-center">
                         <Text className="text-white text-[12.25px]">
-                          {latestReading[carName]?.engine_temperature ?? "N/A"}
+                          {latestReading[carName]?.[0]?.engine_temperature ?? "N/A"}
                         </Text>
                       </View>
                     </View>
@@ -301,11 +376,14 @@ export default function AssetHistory() {
                       <Text className="text-[14px] w-[90px] flex-wrap">
                         Detected Anomaly
                       </Text>
-                      <View className="border bg-black w-[58.79] h-[17] rounded-[70.42] justify-center items-center">
+                      <TouchableOpacity
+                        onPress={() => handleAnomalyPrediction(carName)}
+                        className="border bg-black w-[58.79] h-[17] rounded-[70.42] justify-center items-center"
+                      >
                         <Text className="text-white text-[12.25px]">
-                          {assetHistoryData.anomalyData[carName]?.detectedAnomaly || "N/A"}
+                          {anomalyData[carName]?.anomaly || "Analyze"}
                         </Text>
-                      </View>
+                      </TouchableOpacity>
                     </View>
                   </View>
                   <View className="border border-[#e3e5e9] w-11/12 mt-2"></View>
