@@ -78,7 +78,7 @@ export default function HomePage() {
 
   return (
     <View className="flex-1 justify-start pt-24">
-      <View className="flex-1">
+      <View className="flex-1 ">
         <Text className="text-black self-center font-bold text-[24px]">
           Welcome, {userName}
         </Text>
@@ -94,7 +94,7 @@ export default function HomePage() {
           longitude={location.longitude}
         />
 
-        <View className="mt-8 mx-6">
+        <View className="mt-8 mx-6 mb-20">
           <TouchableOpacity
             onPress={() => router.push("/(landing)/tracking-page")}
             className="bg-green-500 w-full h-12 justify-center items-center rounded-md mb-4"

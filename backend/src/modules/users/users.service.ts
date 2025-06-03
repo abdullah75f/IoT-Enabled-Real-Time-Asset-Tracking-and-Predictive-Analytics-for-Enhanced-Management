@@ -85,7 +85,7 @@ export class UsersService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const verificationLink = `http://192.168.1.6:3000/users/verify-email?token=${token}`;
+    const verificationLink = `http://10.5.90.211:3000/users/verify-email?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
