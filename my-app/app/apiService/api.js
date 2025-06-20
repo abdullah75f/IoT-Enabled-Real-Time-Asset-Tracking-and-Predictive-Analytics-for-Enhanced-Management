@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "../../store/store";
 
 const api = axios.create({
-  baseURL: "http://10.5.90.211:3000",
+  baseURL: "http://192.168.80.18:3000",
 });
 
 api.interceptors.request.use(
@@ -261,6 +261,16 @@ export const fetchCarValues = async () => {
   }
 };
 
+export const fetchCarValuesNew = async () => {
+  try {
+    const response = await api.get("/vehicle-readings/car-values-new");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching car values:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const predictAnomaly = async (temp, speed) => {
   try {
     // Ensure we have valid numbers
@@ -281,6 +291,16 @@ export const predictAnomaly = async (temp, speed) => {
       response: error.response?.data,
       status: error.response?.status
     });
+    throw error;
+  }
+};
+
+export const fetchLatestOBDReading = async () => {
+  try {
+    const response = await api.get("/vehicle-readings/latest-obd");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching OBD readings:", error.response?.data || error.message);
     throw error;
   }
 };

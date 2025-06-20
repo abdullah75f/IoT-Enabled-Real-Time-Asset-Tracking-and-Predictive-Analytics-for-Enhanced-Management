@@ -1,0 +1,148 @@
+#include "BluetoothSerial.h"
+
+// OBD-II adapter MAC address
+uint8_t obdAddress[6] = {0x1C, 0xA1, 0x35, 0x69, 0x8D, 0xC5};
+const char* obdPin = "1234";  // OBD-II adapter PIN
+
+BluetoothSerial SerialBT;
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial); // Wait for serial monitor to open
+  
+  Serial.println("\nOBD-II Data Logger Initializing...");
+  Serial.println("---------------------------------");
+  
+  if (!SerialBT.begin("ESP32_OBD_Client", true)) {
+    Serial.println("Failed to initialize Bluetooth");
+    while (1);
+  }
+  
+  SerialBT.setPin(obdPin, 4);
+  Serial.println("Bluetooth initialized with PIN: 1234");
+  
+  connectToOBD();
+  initializeOBD();
+  
+  Serial.println("\nOBD-II System Ready");
+  Serial.println("------------------");
+  printDivider();
+}
+
+void loop() {
+  if (SerialBT.connected()) {
+    readAndDisplayPID("0105", "Coolant Temp", "°C", 1, -40, 1.0);             // A - 40
+    readAndDisplayPID("010C", "Engine RPM", "rpm", 2, 0, 0.25);               // (256*A + B)/4
+    readAndDisplayPID("010D", "Vehicle Speed", "km/h", 1, 0, 1.0);            // A
+    readAndDisplayPID("0110", "MAF Air Flow", "g/s", 2, 0, 0.01);             // (256*A + B)/100
+    readAndDisplayPID("0111", "Throttle Position", "%", 1, 0, 100.0/255.0);   // A * 100 / 255
+
+    printDivider();
+    delay(3000);
+  } else {
+    Serial.println("Connection lost! Attempting to reconnect...");
+    connectToOBD();
+    delay(2000);
+  }
+}
+
+void connectToOBD() {
+  bool connected = false;
+  int attempt = 0;
+  const int maxAttempts = 3;
+  
+  while (!connected && attempt < maxAttempts) {
+    attempt++;
+    Serial.printf("\nConnection attempt %d/%d...\n", attempt, maxAttempts);
+    connected = SerialBT.connect(obdAddress);
+    
+    unsigned long startTime = millis();
+    while (!connected && (millis() - startTime) < 10000) {
+      delay(500);
+      connected = SerialBT.connected();
+    }
+    
+    if (connected) {
+      Serial.println("Successfully connected to OBD-II adapter");
+      Serial.printf("Adapter: ELM327\nMAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                    obdAddress[0], obdAddress[1], obdAddress[2],
+                    obdAddress[3], obdAddress[4], obdAddress[5]);
+    } else {
+      Serial.println("Connection failed");
+      SerialBT.disconnect();
+      delay(2000);
+    }
+  }
+
+  if (!connected) {
+    Serial.println("Failed to connect. Please check:");
+    Serial.println("- Ignition is ON");
+    Serial.println("- OBD adapter is powered");
+    Serial.println("- Bluetooth is enabled");
+    while (1);
+  }
+}
+
+void initializeOBD() {
+  Serial.println("\nInitializing OBD-II connection...");
+  sendCommand("ATZ", 2000);     // Reset
+  sendCommand("ATE0", 500);     // Echo off
+  sendCommand("ATL0", 500);     // Linefeeds off
+  sendCommand("ATH1", 500);     // Headers on
+  sendCommand("ATSP0", 1000);   // Auto protocol
+  sendCommand("0100", 1000);    // Supported PIDs
+  Serial.println("Initialization complete");
+}
+
+void readAndDisplayPID(String pid, String name, String unit, int bytes, int offset, float scale) {
+  String response = sendCommand(pid, 1000);
+  if (response.length() > 0) {
+    String hexValue = "";
+    int spacePos = response.indexOf(' ');
+    if (spacePos != -1) {
+      hexValue = response.substring(spacePos + 4, spacePos + 4 + bytes * 2);
+    } else if (response.length() >= bytes * 2) {
+      hexValue = response.substring(response.length() - bytes * 2);
+    }
+
+    if (hexValue.length() == bytes * 2) {
+      long value = strtol(hexValue.c_str(), NULL, 16);
+      float result = offset + (value * scale);
+      Serial.printf("%-22s: %6.1f %s\n", name.c_str(), result, unit.c_str());
+      return;
+    }
+  }
+  Serial.printf("%-22s: %s\n", name.c_str(), "No data");
+}
+
+String sendCommand(String cmd, unsigned long timeout) {
+  while (SerialBT.available()) SerialBT.read();
+  SerialBT.print(cmd + "\r");
+
+  unsigned long startTime = millis();
+  String response = "";
+  bool promptReceived = false;
+  while ((millis() - startTime) < timeout && !promptReceived) {
+    while (SerialBT.available()) {
+      char c = SerialBT.read();
+      response += c;
+      if (c == '>') {
+        promptReceived = true;
+        break;
+      }
+    }
+    delay(10);
+  }
+
+  response.replace(cmd, "");
+  response.replace("\r", "");
+  response.replace("\n", "");
+  response.replace(">", "");
+  response.trim();
+
+  return response;
+}
+
+void printDivider() {
+  Serial.println("---------------------------------");
+}
